@@ -1,0 +1,49 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.MusicApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+
+        <!-- Màu lỗi -->
+        <item name="colorError">@color/md_theme_light_error</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
+
+        <!-- Màu nền và bề mặt -->
+        <item name="colorSurface">@color/md_theme_light_surface</item>
+        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+
+        <!-- Màu bổ sung -->
+        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+        <item name="colorSecondary">@color/pink_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+    
+    <style name="ToolbarStyle" parent="Widget.Material3.Toolbar">
+        <item name="navigationIcon">@drawable/ic_arrow_back</item>
+    </style>
+
+    <style name="MiniPlayerStyle" parent="Theme.MusicApp">
+        <item name="android:background">@color/purple_50</item>
+    </style>
+
+    <style name="ButtonBackgroundTheme">
+        <item name="android:backgroundTint">@color/purple_50</item>
+    </style>
+
+    <style name="SearchViewStyle" parent="Widget.Material3.SearchView">
+        <item name="android:searchIcon">@drawable/ic_search_while</item>
+        <item name="android:searchHintIcon">@drawable/ic_search_while</item>
+        <item name="android:closeIcon">@drawable/ic_close</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:tint">@color/white</item>
+        <item name="android:editTextColor">@color/white</item>
+    </style>
+    
+    <style name="SearchKeyStyle">
+        <item name="android:background">@color/purple_50</item>
+    </style>
+</resources>

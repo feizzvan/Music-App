@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.musicapp.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFr_to_moreRecommendedFr"
+            app:destination="@id/moreRecommendedFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_homeFr_to_moreAlbumFr"
+            app:destination="@id/moreAlbumFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_homeFr_to_detailAlbumFr"
+            app:destination="@id/detailAlbumFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/nav_home" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_library"
+        android:name="com.example.musicapp.ui.library.LibraryFragment"
+        android:label="@string/title_library"
+        tools:layout="@layout/fragment_library">
+        <action
+            android:id="@+id/action_libraryFr_to_moreFavoriteFr"
+            app:destination="@id/moreFavoriteFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_library" />
+        <action
+            android:id="@+id/action_libraryFr_to_moreRecentFr"
+            app:destination="@id/moreRecentFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_library" />
+        <action
+            android:id="@+id/action_libraryFr_to_morePlaylistFr"
+            app:destination="@id/morePlaylistFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_library" />
+        <action
+            android:id="@+id/action_libraryFr_to_playlistDetailFr"
+            app:destination="@id/playlistDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/nav_library" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_discovery"
+        android:name="com.example.musicapp.ui.discovery.DiscoveryFragment"
+        android:label="@string/title_discovery"
+        tools:layout="@layout/fragment_discovery">
+        <action
+            android:id="@+id/action_discoveryFr_to_moreArtistFr"
+            app:destination="@id/moreArtistFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_discovery" />
+        <action
+            android:id="@+id/action_discoveryFr_to_detailArtistFr"
+            app:destination="@id/detailArtistFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/nav_discovery" />
+        <action
+            android:id="@+id/action_discoveryFr_to_moreMostHeardFr"
+            app:destination="@id/moreMostHeardFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down"
+            app:popUpTo="@id/nav_discovery" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.musicapp.ui.settings.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@xml/root_preferences" />
+    <fragment
+        android:id="@+id/moreAlbumFragment"
+        android:name="com.example.musicapp.ui.home.album.more.MoreAlbumFragment"
+        android:label="fragment_more_album"
+        tools:layout="@layout/fragment_more_album">
+        <action
+            android:id="@+id/action_moreAlbumFr_to_detailAlbumFr"
+            app:destination="@id/detailAlbumFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/moreAlbumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailAlbumFragment"
+        android:name="com.example.musicapp.ui.home.album.detail.DetailAlbumFragment"
+        android:label="fragment_detail_album"
+        tools:layout="@layout/fragment_detail_album">
+        <argument
+            android:name="id"
+            android:defaultValue="0" />
+        <argument
+            android:name="title"
+            android:defaultValue='""'
+            app:argType="string" />
+        <argument
+            android:name="coverImageUrl"
+            android:defaultValue='""'
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/moreRecommendedFragment"
+        android:name="com.example.musicapp.ui.home.recommended.more.MoreRecommendedFragment"
+        android:label="fragment_more_recommended"
+        tools:layout="@layout/fragment_more_recommended" />
+    <fragment
+        android:id="@+id/moreRecentFragment"
+        android:name="com.example.musicapp.ui.library.recent.more.MoreRecentFragment"
+        android:label="fragment_more_recent"
+        tools:layout="@layout/fragment_more_recent" />
+    <fragment
+        android:id="@+id/moreFavoriteFragment"
+        android:name="com.example.musicapp.ui.library.favorite.more.MoreFavoriteFragment"
+        android:label="fragment_more_favorite"
+        tools:layout="@layout/fragment_more_favorite" />
+    <fragment
+        android:id="@+id/morePlaylistFragment"
+        android:name="com.example.musicapp.ui.library.playlist.more.MorePlaylistFragment"
+        android:label="fragment_more_playlist"
+        tools:layout="@layout/fragment_more_playlist">
+        <action
+            android:id="@+id/action_morePlaylistFr_to_playlistDetailFr"
+            app:destination="@id/playlistDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/morePlaylistFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/playlistDetailFragment"
+        android:name="com.example.musicapp.ui.library.playlist.detail.PlaylistDetailFragment"
+        android:label="fragment_playlist_detail"
+        tools:layout="@layout/fragment_playlist_detail">
+        <argument
+            android:name="id"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            android:defaultValue='""'
+            app:argType="string" />
+        <argument
+            android:name="userId"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailArtistFragment"
+        android:name="com.example.musicapp.ui.discovery.artist.detail.DetailArtistFragment"
+        android:label="fragment_detail_artist"
+        tools:layout="@layout/fragment_detail_artist">
+        <argument
+            android:name="artistId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="artistName"
+            app:argType="string"
+            android:defaultValue='""' />
+        <argument
+            android:name="artistAvatar"
+            app:argType="string"
+            android:defaultValue='""' />
+    </fragment>
+    <fragment
+        android:id="@+id/moreMostHeardFragment"
+        android:name="com.example.musicapp.ui.discovery.mostheard.more.MoreMostHeardFragment"
+        android:label="fragment_more_most_heard"
+        tools:layout="@layout/fragment_more_most_heard" />
+    <fragment
+        android:id="@+id/moreArtistFragment"
+        android:name="com.example.musicapp.ui.discovery.artist.more.MoreArtistFragment"
+        android:label="fragment_more_artist"
+        tools:layout="@layout/fragment_more_artist">
+        <action
+            android:id="@+id/action_moreArtistFr_to_detailArtistFr"
+            app:destination="@id/detailArtistFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/moreArtistFragment" />
+    </fragment>
+    <navigation
+        android:id="@+id/nav_now_playing"
+        app:startDestination="@id/nowPlayingActivity">
+        <activity
+            android:id="@+id/nowPlayingActivity"
+            android:name="com.example.musicapp.ui.playing.NowPlayingActivity"
+            android:label="activity_now_playing"
+            tools:layout="@layout/activity_now_playing" />
+    </navigation>
+    <action
+        android:id="@+id/action_global_nav_now_playing"
+        app:destination="@id/nav_now_playing"
+        app:enterAnim="@anim/slide_up"
+        app:exitAnim="@anim/slide_down"
+        app:popEnterAnim="@anim/slide_up"
+        app:popExitAnim="@anim/slide_down" />
+    <fragment
+        android:id="@+id/fr_searching"
+        android:name="com.example.musicapp.ui.searching.SearchingFragment"
+        android:label="fragment_searching"
+        tools:layout="@layout/fragment_searching" />
+    <action
+        android:id="@+id/action_global_fr_searching"
+        app:destination="@id/fr_searching"
+        app:enterAnim="@anim/fade_in"
+        app:exitAnim="@anim/fade_out"
+        app:popEnterAnim="@anim/fade_in"
+        app:popExitAnim="@anim/fade_out" />
+</navigation>

@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/languages_header">
+        <ListPreference
+            android:defaultValue="en"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:icon="@drawable/ic_language"
+            android:key="language"
+            android:title="@string/language_title"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/theme_header">
+        <SwitchPreferenceCompat
+            android:icon="@drawable/ic_theme"
+            app:key="dark_mode"
+            app:title="@string/dark_mode_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/title_account">
+        <Preference
+            android:icon="@drawable/ic_lock_settings"
+            android:key="change_password"
+            android:title="@string/title_change_password" />
+        <Preference
+            android:icon="@drawable/ic_log_out"
+            android:key="logout"
+            android:title="@string/title_logout" />
+    </PreferenceCategory>
+</PreferenceScreen>

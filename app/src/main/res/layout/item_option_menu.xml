@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/img_menu_option_item_icon"
+        android:layout_width="@dimen/item_song_avatar_sizes_48dp"
+        android:layout_height="@dimen/item_song_avatar_sizes_48dp"
+        android:layout_marginStart="@dimen/margin_8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/imgDescription"
+        android:padding="@dimen/padding_8dp"
+        tools:ignore="ImageContrastCheck"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/text_menu_option_item_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:paddingStart="@dimen/padding_8dp"
+        android:paddingTop="@dimen/padding_8dp"
+        android:paddingEnd="@dimen/padding_16dp"
+        android:paddingBottom="@dimen/padding_8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        tools:text="Song title" />
+</LinearLayout>
