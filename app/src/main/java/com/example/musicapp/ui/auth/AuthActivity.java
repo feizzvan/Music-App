@@ -11,6 +11,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.musicapp.R;
 import com.example.musicapp.databinding.ActivityAuthBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AuthActivity extends AppCompatActivity {
     private ActivityAuthBinding mBinding;
 

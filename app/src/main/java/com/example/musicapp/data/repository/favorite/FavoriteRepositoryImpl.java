@@ -18,17 +18,17 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     }
 
     @Override
-    public Single<Favorite> addFavorite(FavoriteRequest favoriteRequest) {
-        return mRemoteDataSource.addFavorite(favoriteRequest);
+    public Single<Favorite> addFavorite(String token, FavoriteRequest favoriteRequest) {
+        return mRemoteDataSource.addFavorite(token, favoriteRequest);
     }
 
     @Override
-    public Single<Favorite> removeFavorite(FavoriteRequest favoriteRequest) {
-        return mRemoteDataSource.removeFavorite(favoriteRequest);
+    public Single<Favorite> removeFavorite(String token, FavoriteRequest favoriteRequest) {
+        return mRemoteDataSource.removeFavorite(token, favoriteRequest);
     }
 
     @Override
-    public Single<FavoriteByUserId> getFavorites(int userId) {
-        return mRemoteDataSource.getFavorites(userId);
+    public Single<FavoriteByUserId> getFavorites(String token, int userId) {
+        return mRemoteDataSource.getFavorites(token, userId);
     }
 }

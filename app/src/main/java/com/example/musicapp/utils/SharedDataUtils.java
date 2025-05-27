@@ -10,15 +10,11 @@ import com.example.musicapp.data.model.RecentSong;
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.recent.RecentSongRepository;
-import com.example.musicapp.data.repository.song.SongRepository;
-import com.example.musicapp.data.repository.song.SongRepositoryImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
@@ -31,7 +27,7 @@ public final class SharedDataUtils {
     private static String mPlaylistName;
     private static final MutableLiveData<Integer> mIndexToPlay = new MutableLiveData<>();
     private static final MutableLiveData<Boolean> isSongLoaded = new MutableLiveData<>();
-    private static final MutableLiveData<List<Integer>> mFavoriteSongIdsLiveData = new MutableLiveData<>(new ArrayList<>());
+    private static final MutableLiveData<List<Song>> mFavoriteSongsLiveData = new MutableLiveData<>(new ArrayList<>());
 
     static {
         initPlaylists();
@@ -60,35 +56,42 @@ public final class SharedDataUtils {
 //        return repository.updateSong(song);
 //    }
 
-    public static LiveData<List<Integer>> getFavoriteSongIdsLiveData() {
-        return mFavoriteSongIdsLiveData;
+    public static LiveData<List<Song>> getFavoriteSongsLiveData() {
+        return mFavoriteSongsLiveData;
     }
 
-    public static void setFavoriteSongIds(List<Integer> ids) {
-        if (ids == null) ids = new ArrayList<>();
-        mFavoriteSongIdsLiveData.setValue(new ArrayList<>(ids));
-    }
-
-    public static void addFavoriteId(int songId) {
-        List<Integer> ids = mFavoriteSongIdsLiveData.getValue();
-        if (ids == null) ids = new ArrayList<>();
-        if (!ids.contains(songId)) {
-            ids.add(songId);
-            mFavoriteSongIdsLiveData.setValue(new ArrayList<>(ids));
+    public static void setFavoriteSongs(List<Song> songs) {
+        if (songs == null) {
+            songs = new ArrayList<>();
         }
+        mFavoriteSongsLiveData.setValue(new ArrayList<>(songs));
     }
 
-    public static void removeFavoriteId(int songId) {
-        List<Integer> ids = mFavoriteSongIdsLiveData.getValue();
-        if (ids != null && ids.contains(songId)) {
-            ids.remove(Integer.valueOf(songId));
-            mFavoriteSongIdsLiveData.setValue(new ArrayList<>(ids));
+    public static void addFavoriteSong(Song song) {
+        if (song == null) return;
+        List<Song> songs = mFavoriteSongsLiveData.getValue();
+        if (songs == null) songs = new ArrayList<>();
+        for (Song s : songs) {
+            if (s.getId() == song.getId()) return;
+        }
+        songs.add(0, song);
+        mFavoriteSongsLiveData.setValue(new ArrayList<>(songs));
+    }
+
+    public static void removeFavoriteSong(int songId) {
+        List<Song> songs = mFavoriteSongsLiveData.getValue();
+        if (songs != null) {
+            songs.removeIf(s -> s.getId() == songId);
+            mFavoriteSongsLiveData.setValue(new ArrayList<>(songs));
         }
     }
 
     public static boolean isFavorite(int songId) {
-        List<Integer> ids = mFavoriteSongIdsLiveData.getValue();
-        return ids != null && ids.contains(songId);
+        List<Song> songs = getFavoriteSongsLiveData().getValue();
+        if (songs == null) return false;
+        for (Song song : songs)
+            if (song.getId() == songId) return true;
+        return false;
     }
 
     public static void setupPreviousSessionPlayingSong(String songId, String playlistName) {

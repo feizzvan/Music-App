@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class TokenManager {
-    private static final String PREFS_NAME = "prefs";
-    private static final String KEY_TOKEN = "token";
+    private static final String PREFS_NAME = "auth";
+    private static final String KEY_TOKEN = "access_token";
     private static final String KEY_USER_ID = "user_id";
     private final SharedPreferences mSharedPreferences;
 

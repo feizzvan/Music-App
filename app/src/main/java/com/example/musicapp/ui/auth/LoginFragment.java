@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,18 +28,21 @@ import com.example.musicapp.utils.TokenManager;
 
 import java.util.Objects;
 
+import javax.inject.Inject;
+
+import dagger.hilt.InstallIn;
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class LoginFragment extends Fragment {
     private FragmentLoginBinding mBinding;
-
     private final AppService appService = RetrofitHelper.getInstance();
 
-    public LoginFragment() {
-
-    }
+    @Inject
+    public TokenManager tokenManager;
 
     @Nullable
     @Override
@@ -90,21 +94,15 @@ public class LoginFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getAccessToken();
-
-                    // Lưu token vào SharedPreferences
-                    SharedPreferences preferences = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE);
-                    preferences.edit().putString("access_token", token).apply();
-                    preferences.edit().putInt("user_id", response.body().getUserId()).apply();
-
-                    TokenManager tokenManager = new TokenManager(requireContext());
+                    tokenManager.saveToken(token);
                     tokenManager.saveUserId(response.body().getUserId());
+                    Log.d("TOKEN_CHECK", "Token: " + tokenManager.getToken());
 
                     Toast.makeText(requireContext(), R.string.text_login_successful, Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(requireContext(), MainActivity.class);
                     startActivity(intent);
                     requireActivity().finish();
-
                 } else {
                     Toast.makeText(requireContext(), R.string.text_please_check_your_login_information_again, Toast.LENGTH_SHORT).show();
                 }

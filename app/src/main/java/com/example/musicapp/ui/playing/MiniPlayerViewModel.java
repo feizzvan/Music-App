@@ -10,11 +10,10 @@ import androidx.media3.common.MediaItem;
 import com.example.musicapp.data.model.favorite.Favorite;
 import com.example.musicapp.data.model.favorite.FavoriteRequest;
 import com.example.musicapp.data.model.song.Song;
-import com.example.musicapp.data.model.song.SongList;
 import com.example.musicapp.data.repository.favorite.FavoriteRepository;
 import com.example.musicapp.utils.SharedDataUtils;
+import com.example.musicapp.utils.TokenManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -29,52 +28,41 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MiniPlayerViewModel extends ViewModel {
     private final MutableLiveData<Boolean> mIsPlaying = new MutableLiveData<>();
     private final MutableLiveData<List<MediaItem>> mMediaItems = new MutableLiveData<>();
-    private CompositeDisposable mDisposable = new CompositeDisposable();
     private final FavoriteRepository favoriteRepository;
+    private final TokenManager tokenManager;
+    private CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Inject
-    public MiniPlayerViewModel(FavoriteRepository favoriteRepository) {
+    public MiniPlayerViewModel(FavoriteRepository favoriteRepository, TokenManager tokenManager) {
         this.favoriteRepository = favoriteRepository;
+        this.tokenManager = tokenManager;
     }
 
-    public boolean isFavorite(int songId) {
-        List<Integer> ids = SharedDataUtils.getFavoriteSongIdsLiveData().getValue();
-        return ids != null && ids.contains(songId);
-    }
-
-    public void syncFavoriteSongIds(int userId) {
-        mDisposable.add(favoriteRepository.getFavorites(userId)
+    public void addFavoriteAndSync(Song song) {
+        int userId = tokenManager.getUserId();
+        mDisposable.add(addFavorite(userId, song.getId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(favoriteListResponse -> {
-                    List<Integer> songIds = new ArrayList<>();
-                    List<Song> songs = favoriteListResponse.getData().getSongs() != null ? favoriteListResponse.getData().getSongs() : null;
-                    if (songs != null) {
-                        for (Song song : songs) {
-                            songIds.add(song.getId());
-                        }
-                    }
-                    SharedDataUtils.setFavoriteSongIds(songIds);
+                .subscribe(fav -> {
+                    SharedDataUtils.addFavoriteSong(song);
                 }, throwable -> {
+                    // handle error
                 })
         );
+
     }
 
-    public void addFavoriteId(int songId) {
-        List<Integer> ids = SharedDataUtils.getFavoriteSongIdsLiveData().getValue();
-        if (ids == null) ids = new ArrayList<>();
-        if (!ids.contains(songId)) {
-            ids.add(songId);
-            SharedDataUtils.setFavoriteSongIds(ids);
-        }
-    }
-
-    public void removeFavoriteId(int songId) {
-        List<Integer> ids = SharedDataUtils.getFavoriteSongIdsLiveData().getValue();
-        if (ids != null && ids.contains(songId)) {
-            ids.remove(Integer.valueOf(songId));
-            SharedDataUtils.setFavoriteSongIds(ids);
-        }
+    public void removeFavoriteAndSync(Song song) {
+        int userId = tokenManager.getUserId();
+        mDisposable.add(removeFavorite(userId, song.getId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fav -> {
+                    SharedDataUtils.removeFavoriteSong(song.getId());
+                }, throwable -> {
+                    // handle error
+                })
+        );
     }
 
     public void setMediaItems(List<MediaItem> mediaItems) {
@@ -94,27 +82,31 @@ public class MiniPlayerViewModel extends ViewModel {
     }
 
     public Single<Favorite> addFavorite(int userId, int songId) {
+        String token = "Bearer " + tokenManager.getToken();
         FavoriteRequest request = new FavoriteRequest(userId, songId);
-        return favoriteRepository.addFavorite(request);
+        return favoriteRepository.addFavorite(token, request);
     }
 
     public Single<Favorite> removeFavorite(int userId, int songId) {
+        String token = "Bearer " + tokenManager.getToken();
         FavoriteRequest request = new FavoriteRequest(userId, songId);
-        return favoriteRepository.removeFavorite(request);
+        return favoriteRepository.removeFavorite(token, request);
     }
 
     public static class Factory implements ViewModelProvider.Factory {
-        private final FavoriteRepository favoriteRepository;
+        private final FavoriteRepository mFavoriteRepository;
+        private final TokenManager tokenManager;
 
-        public Factory(FavoriteRepository favoriteRepository) {
-            this.favoriteRepository = favoriteRepository;
+        public Factory(FavoriteRepository favoriteRepository, TokenManager tokenManager) {
+            mFavoriteRepository = favoriteRepository;
+            this.tokenManager = tokenManager;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(Class<T> modelClass) {
             if (modelClass.isAssignableFrom(MiniPlayerViewModel.class)) {
-                return (T) new MiniPlayerViewModel(favoriteRepository);
+                return (T) new MiniPlayerViewModel(mFavoriteRepository, tokenManager);
             }
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

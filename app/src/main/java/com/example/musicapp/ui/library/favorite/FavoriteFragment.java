@@ -2,26 +2,23 @@ package com.example.musicapp.ui.library.favorite;
 
 import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.FAVOURITE;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.navigation.NavDirections;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.databinding.FragmentFavoriteBinding;
 import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.SongListAdapter;
 import com.example.musicapp.ui.library.LibraryFragmentDirections;
-import com.example.musicapp.ui.library.LibraryViewModel;
-import com.example.musicapp.ui.library.favorite.more.MoreFavoriteViewModel;
+import com.example.musicapp.utils.SharedDataUtils;
 import com.example.musicapp.utils.TokenManager;
 
 import java.util.ArrayList;
@@ -34,9 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class FavoriteFragment extends AppBaseFragment {
     private FragmentFavoriteBinding mBinding;
-    private MoreFavoriteViewModel mMoreFavoriteViewModel;
     private FavoriteViewModel mFavoriteViewModel;
-    private LibraryViewModel mLibraryFavoriteViewModel;
     private SongListAdapter mAdapter;
 
     @Inject
@@ -44,11 +39,6 @@ public class FavoriteFragment extends AppBaseFragment {
 
     @Inject
     public FavoriteViewModel.Factory favoriteFactory;
-
-    @Inject
-    public LibraryViewModel.Factory libraryFactory;
-
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -80,6 +70,10 @@ public class FavoriteFragment extends AppBaseFragment {
         mAdapter = new SongListAdapter(
                 (song, index) -> {
                     String playlistName = FAVOURITE.getValue();
+                    List<Song> favoriteSongs = SharedDataUtils.getFavoriteSongsLiveData().getValue();
+                    SharedDataUtils.setupPlaylist(favoriteSongs, playlistName);
+                    SharedDataUtils.setCurrentPlaylist(playlistName);
+                    SharedDataUtils.setIndexToPlay(index);
                     showAndPlay(song, index, playlistName);
                 },
                 this::showOptionMenu
@@ -92,22 +86,11 @@ public class FavoriteFragment extends AppBaseFragment {
     private void setupViewModel() {
         mFavoriteViewModel =
                 new ViewModelProvider(requireActivity(), favoriteFactory).get(FavoriteViewModel.class);
-        mMoreFavoriteViewModel =
-                new ViewModelProvider(requireActivity()).get(MoreFavoriteViewModel.class);
-        mLibraryFavoriteViewModel =
-                new ViewModelProvider(requireActivity(), libraryFactory).get(LibraryViewModel.class);
 
-        mFavoriteViewModel.getFavoriteSongs().observe(getViewLifecycleOwner(), songs -> {
-            mMoreFavoriteViewModel.setFavoriteSongs(songs);
-            mLibraryFavoriteViewModel.setFavoriteSongs(songs);
-
+        SharedDataUtils.getFavoriteSongsLiveData().observe(getViewLifecycleOwner(), songs -> {
             List<Song> subList = new ArrayList<>();
             if (songs != null)
-                if (songs.size() < 10) {
-                    subList.addAll(songs);
-                } else {
-                    subList.addAll(songs.subList(0, 10));
-                }
+                subList.addAll(songs.size() < 10 ? songs : songs.subList(0, 10));
             mAdapter.updateSongs(subList);
         });
     }

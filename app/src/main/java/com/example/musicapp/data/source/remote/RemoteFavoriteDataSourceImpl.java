@@ -22,10 +22,10 @@ public class RemoteFavoriteDataSourceImpl implements FavoriteDataSource {
     }
 
     @Override
-    public Single<Favorite> addFavorite(FavoriteRequest favoriteRequest) {
+    public Single<Favorite> addFavorite(String token, FavoriteRequest favoriteRequest) {
         return Single.create(emitter -> {
             AppService appService = RetrofitHelper.getInstance();
-            Call<Favorite> call = appService.addFavorite(favoriteRequest);
+            Call<Favorite> call = appService.addFavorite(token, favoriteRequest);
 
             call.enqueue(new Callback<Favorite>() {
                 public void onResponse(@NonNull Call<Favorite> call, @NonNull Response<Favorite> response) {
@@ -45,10 +45,10 @@ public class RemoteFavoriteDataSourceImpl implements FavoriteDataSource {
     }
 
     @Override
-    public Single<Favorite> removeFavorite(FavoriteRequest favoriteRequest) {
+    public Single<Favorite> removeFavorite(String token, FavoriteRequest favoriteRequest) {
         return Single.create(emitter -> {
             AppService appService = RetrofitHelper.getInstance();
-            Call<Favorite> call = appService.removeFavorite(favoriteRequest);
+            Call<Favorite> call = appService.removeFavorite(token, favoriteRequest);
 
             call.enqueue(new Callback<Favorite>() {
                 public void onResponse(@NonNull Call<Favorite> call, @NonNull Response<Favorite> response) {
@@ -68,10 +68,10 @@ public class RemoteFavoriteDataSourceImpl implements FavoriteDataSource {
     }
 
     @Override
-    public Single<FavoriteByUserId> getFavorites(int userId) {
+    public Single<FavoriteByUserId> getFavorites(String token, int userId) {
         return Single.create(emitter -> {
             AppService appService = RetrofitHelper.getInstance();
-            Call<FavoriteByUserId> call = appService.getFavoriteByUserId(userId);
+            Call<FavoriteByUserId> call = appService.getFavoriteByUserId(token, userId);
 
             call.enqueue(new Callback<FavoriteByUserId>() {
                 public void onResponse(@NonNull Call<FavoriteByUserId> call,

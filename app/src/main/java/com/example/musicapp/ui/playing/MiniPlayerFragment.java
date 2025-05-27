@@ -44,16 +44,13 @@ import com.example.musicapp.utils.TokenManager;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class MiniPlayerFragment extends Fragment implements View.OnClickListener {
     private FragmentMiniPlayerBinding mBinding;
     private MiniPlayerViewModel mMiniPlayerViewModel;
-    //    private MediaSession mMediaSession;
-    private MediaController mMediaSession;
+    private MediaController mMediaController;
     private Player.Listener mPlayerListener;
     private Animator mAnimator;
     private ObjectAnimator mRotationAnimator;
@@ -91,11 +88,11 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
             MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) iBinder;
             binder.isMediaControllerInitialized().observe(MiniPlayerFragment.this, isInitialized -> {
                 if (isInitialized) {
-                    if (mMediaSession == null) {
-                        mMediaSession = binder.getMediaSession();
+                    if (mMediaController == null) {
+                        mMediaController = binder.getMediaSession();
 
                         setupViewModel();
-                        setMediaSession(mMediaSession);
+                        setMediaSession(mMediaController);
                         setupObserveControllerData();
                     }
                 }
@@ -104,7 +101,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mMediaSession = null;
+            mMediaController = null;
         }
     };
 
@@ -122,19 +119,6 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
         setupAnimator();
         setupListener();
         setupViewModel();
-
-        // Đồng bộ favorite khi fragment được tạo
-        int userId = tokenManager.getUserId();
-        mMiniPlayerViewModel.syncFavoriteSongIds(userId);
-
-        // Lắng nghe favorite song ids để update UI
-        SharedDataUtils.getFavoriteSongIdsLiveData().observe(getViewLifecycleOwner(), ids -> {
-            PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
-            if (playingSong != null && playingSong.getSong() != null) {
-                boolean isFavorite = ids != null && ids.contains(playingSong.getSong().getId());
-                updateFavoriteStatus(isFavorite);
-            }
-        });
     }
 
     @Override
@@ -149,16 +133,16 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
         super.onStop();
         try {
             requireActivity().unbindService(mMusicServiceConnection);
-        } catch (Exception e) {
-            // Ignore if service is not bound
+        } catch (IllegalArgumentException ignored) {
+
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mMediaSession != null) {
-            mMediaSession.removeListener(mPlayerListener);
+        if (mMediaController != null) {
+            mMediaController.removeListener(mPlayerListener);
         }
         mDisposable.dispose();
     }
@@ -186,11 +170,11 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
             if (playingSong != null) {
                 currentPlaylist = playingSong.getPlaylist();
             }
-            if (mMediaSession != null && (mMediaSession.getMediaItemCount() == 0
+            if (mMediaController != null && (mMediaController.getMediaItemCount() == 0
                     || playlist != null && playlist.getMediaItems() != null
                     && !playlist.getMediaItems().isEmpty()
                     && (currentPlaylist == null || currentPlaylist.getId() != playlist.getId()
-                    || playlist.getMediaItems().size() != mMediaSession.getMediaItemCount()))
+                    || playlist.getMediaItems().size() != mMediaController.getMediaItemCount()))
                     || (playlist != null && playlist.getName().compareTo(SEARCHED.getValue()) == 0)) {
                 mMiniPlayerViewModel.setMediaItems(playlist.getMediaItems());
             }
@@ -204,6 +188,14 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
         });
 
         mMiniPlayerViewModel.isPlaying().observe(getViewLifecycleOwner(), this::updatePlayingState);
+
+        SharedDataUtils.getFavoriteSongsLiveData().observe(getViewLifecycleOwner(), favoriteSongs -> {
+            PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
+            if (playingSong != null && playingSong.getSong() != null) {
+                boolean isFavorite = SharedDataUtils.isFavorite(playingSong.getSong().getId());
+                updateFavoriteStatus(isFavorite);
+            }
+        });
     }
 
     private void setupAnimator() {
@@ -233,18 +225,18 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void setupPlayPauseAction() {
-        if (mMediaSession != null) {
-            if (mMediaSession.isPlaying()) {
-                mMediaSession.pause();
+        if (mMediaController != null) {
+            if (mMediaController.isPlaying()) {
+                mMediaController.pause();
             } else {
-                mMediaSession.play();
+                mMediaController.play();
             }
         }
     }
 
     private void setupNextAction() {
-        if (mMediaSession != null && mMediaSession.hasNextMediaItem()) {
-            mMediaSession.seekToNext();
+        if (mMediaController != null && mMediaController.hasNextMediaItem()) {
+            mMediaController.seekToNext();
             mRotationAnimator.end();
         }
     }
@@ -253,34 +245,15 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
         PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
         if (playingSong != null) {
             Song song = playingSong.getSong();
-            int userId = tokenManager.getUserId();
             int songId = song.getId();
-            boolean isFavorite = mMiniPlayerViewModel.isFavorite(songId);
+            boolean isFavorite = SharedDataUtils.isFavorite(songId);
 
             if (isFavorite) {
-                mDisposable.add(mMiniPlayerViewModel.removeFavorite(userId, songId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(response -> {
-                                    mMiniPlayerViewModel.removeFavoriteId(songId);
-                                    updateFavoriteStatus(false);
-                                },
-                                throwable -> {
-                                }
-                        )
-                );
+                mMiniPlayerViewModel.removeFavoriteAndSync(song);
+                updateFavoriteStatus(false);
             } else {
-                mDisposable.add(mMiniPlayerViewModel.addFavorite(userId, songId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(response -> {
-                                    mMiniPlayerViewModel.addFavoriteId(songId);
-                                    updateFavoriteStatus(true);
-                                },
-                                throwable -> {
-                                }
-                        )
-                );
+                mMiniPlayerViewModel.addFavoriteAndSync(song);
+                updateFavoriteStatus(true);
             }
         }
     }
@@ -306,14 +279,14 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void setMediaSession(MediaController mediaSession) {
-        mMediaSession = mediaSession;
+        mMediaController = mediaSession;
         mPlayerListener = new Player.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 mMiniPlayerViewModel.setIsPlaying(isPlaying);
             }
         };
-        mMediaSession.addListener(mPlayerListener);
+        mMediaController.addListener(mPlayerListener);
     }
 
     private void showSongInfo(Song song) {
@@ -325,20 +298,20 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                     .into(mBinding.imgMiniPlayerAvatar);
             mBinding.textMiniPlayerTitle.setText(song.getTitle());
             mBinding.textMiniPlayerArtist.setText(song.getArtistId() != 0 ? String.valueOf(song.getArtistId()) : "Unknown");
-            boolean isFavorite = mMiniPlayerViewModel.isFavorite(song.getId());
+            boolean isFavorite = SharedDataUtils.isFavorite(song.getId());
             updateFavoriteStatus(isFavorite);
         }
     }
 
     private void setupObserveControllerData() {
-        if (mMediaSession != null && mMediaSession.isPlaying() && AppUtils.sIsConfigChanged) {
+        if (mMediaController != null && mMediaController.isPlaying() && AppUtils.sIsConfigChanged) {
             AppUtils.sIsConfigChanged = false;
             return;
         }
 
         mMiniPlayerViewModel.getMediaItems().observe(getViewLifecycleOwner(), mediaItems -> {
-            if (mMediaSession != null) {
-                mMediaSession.setMediaItems(mediaItems);
+            if (mMediaController != null) {
+                mMediaController.setMediaItems(mediaItems);
             }
         });
 
@@ -351,18 +324,18 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
             Playlist playlist = SharedDataUtils.getCurrentPlaylist().getValue();
             // TH1: cùng playlist, cùng index => KHÔNG phát lại mà tiếp tục
             // TH2: khác playlist, cùng index => PHÁT từ đầu bài hát
-            if (mMediaSession != null && index > -1) {
-                Boolean condition1 = mMediaSession.getMediaItemCount() > index
-                        && mMediaSession.getCurrentMediaItemIndex() != index;
+            if (mMediaController != null && index > -1) {
+                Boolean condition1 = mMediaController.getMediaItemCount() > index
+                        && mMediaController.getCurrentMediaItemIndex() != index;
                 Boolean condition2 = playlist != null && currentPlaylist != null
-                        && mMediaSession.getCurrentMediaItemIndex() == index
+                        && mMediaController.getCurrentMediaItemIndex() == index
                         && playlist.getId() != currentPlaylist.getId();
                 Boolean condition3 = playlist != null
                         && playlist.getName().compareTo(SEARCHED.getValue()) == 0;
                 if (condition1 || condition2 || condition3) {
-                    mMediaSession.seekTo(index, 0);
-//                    mMediaSession.getPlayer().prepare();
-                    mMediaSession.play();
+                    mMediaController.seekTo(index, 0);
+//                    mMediaController.getPlayer().prepare();
+                    mMediaController.play();
                 }
             }
         });

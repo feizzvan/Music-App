@@ -1,7 +1,11 @@
 package com.example.musicapp.data.model.auth;
 
+import com.google.gson.annotations.SerializedName;
+
 public class AuthenticationResponse {
+    @SerializedName("access_token")
     private String accessToken;
+    @SerializedName("refresh_token")
     private String refreshToken;
     private String role;
     private Integer userId;

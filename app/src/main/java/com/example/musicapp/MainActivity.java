@@ -27,7 +27,6 @@ import com.example.musicapp.data.model.PlayingSong;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.databinding.ActivityMainBinding;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
-import com.example.musicapp.ui.playing.NowPlayingViewModel;
 import com.example.musicapp.utils.AppUtils;
 import com.example.musicapp.utils.PermissionUtils;
 import com.example.musicapp.utils.SharedDataUtils;
@@ -91,9 +90,6 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
-
-        NowPlayingViewModel nowPlayingViewModel = new ViewModelProvider(this).get(NowPlayingViewModel.class);
-        nowPlayingViewModel.syncFavoriteSongIds(tokenManager.getUserId());
 
         setupToolbar();
         setupViewModel();

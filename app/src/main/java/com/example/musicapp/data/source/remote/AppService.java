@@ -4,8 +4,11 @@ import com.example.musicapp.data.model.album.AlbumById;
 import com.example.musicapp.data.model.album.AlbumList;
 import com.example.musicapp.data.model.artist.ArtistList;
 import com.example.musicapp.data.model.artist.ArtistWithSongs;
+import com.example.musicapp.data.model.auth.AuthenticationResponse;
 import com.example.musicapp.data.model.auth.ForgotPasswordRequest;
+import com.example.musicapp.data.model.auth.LoginRequest;
 import com.example.musicapp.data.model.auth.LogoutRequest;
+import com.example.musicapp.data.model.auth.RegisterRequest;
 import com.example.musicapp.data.model.auth.ResetPassword;
 import com.example.musicapp.data.model.favorite.Favorite;
 import com.example.musicapp.data.model.favorite.FavoriteByUserId;
@@ -14,18 +17,18 @@ import com.example.musicapp.data.model.listeningcounts.ListeningCountsRequest;
 import com.example.musicapp.data.model.listeningcounts.ListeningCountsResponse;
 import com.example.musicapp.data.model.listeningcounts.TopListeningCounts;
 import com.example.musicapp.data.model.playlist.CreatePlaylist;
+import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.playlist.PlaylistById;
 import com.example.musicapp.data.model.playlist.PlaylistByUserId;
+import com.example.musicapp.data.model.playlist.PlaylistUpdateTitle;
 import com.example.musicapp.data.model.recommended.TopRecommended;
 import com.example.musicapp.data.model.song.SongList;
-import com.example.musicapp.data.model.auth.LoginRequest;
-import com.example.musicapp.data.model.auth.RegisterRequest;
-import com.example.musicapp.data.model.auth.AuthenticationResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.HTTP;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -61,28 +64,59 @@ public interface AppService {
     Call<AlbumById> getAlbumById(@Path("id") int id);
 
     @POST("/api/v1/playlists/create")
-    Call<PlaylistById> createPlaylist(@Body CreatePlaylist createPlaylist);
+    Call<PlaylistById> createPlaylist(
+            @Header("Authorization") String token,
+            @Body CreatePlaylist createPlaylist
+    );
 
     @PUT("/api/v1/playlists/update/{id}")
-    Call<PlaylistById> updatePlayList(@Path("id") int id, @Body CreatePlaylist createPlaylist);
+    Call<PlaylistById> updatePlayList(
+            @Header("Authorization") String token,
+            @Path("id") int id, @Body CreatePlaylist createPlaylist
+    );
 
     @HTTP(method = "DELETE", path = "/api/v1/playlists/delete/{id}", hasBody = true)
-    Call<PlaylistById> deletePlaylist(@Path("id") int id);
+    Call<PlaylistById> deletePlaylist(
+            @Header("Authorization") String token,
+            @Path("id") int id
+    );
 
     @GET("/api/v1/playlists/user/{userId}")
-    Call<PlaylistByUserId> getPlaylistByUserId(@Path("userId") int userId);
+    Call<PlaylistByUserId> getPlaylistByUserId(
+            @Header("Authorization") String token,
+            @Path("userId") int userId
+    );
 
     @GET("/api/v1/playlists/get-by-id/{id}")
-    Call<PlaylistById> getPlaylistById(@Path("id") int id);
+    Call<PlaylistById> getPlaylistById(
+            @Header("Authorization") String token,
+            @Path("id") int id
+    );
+
+    @PUT("/api/v1/playlists/update-title/{playlistId}")
+    Call<Playlist> updatePlaylistTitle(
+            @Header("Authorization") String token,
+            @Path("playlistId") int playlistId,
+            @Body PlaylistUpdateTitle playlistUpdateTitle
+    );
 
     @POST("/api/v1/favorites/add")
-    Call<Favorite> addFavorite(@Body FavoriteRequest favoriteRequest);
+    Call<Favorite> addFavorite(
+            @Header("Authorization") String token,
+            @Body FavoriteRequest favoriteRequest
+    );
 
     @HTTP(method = "DELETE", path = "/api/v1/favorites/remove", hasBody = true)
-    Call<Favorite> removeFavorite(@Body FavoriteRequest favoriteRequest);
+    Call<Favorite> removeFavorite(
+            @Header("Authorization") String token,
+            @Body FavoriteRequest favoriteRequest
+    );
 
     @GET("/api/v1/favorites/get-by-user-id/{userId}")
-    Call<FavoriteByUserId> getFavoriteByUserId(@Path("userId") int userId);
+    Call<FavoriteByUserId> getFavoriteByUserId(
+            @Header("Authorization") String token,
+            @Path("userId") int userId
+    );
 
     @POST("/api/v1/listening-counts")
     Call<ListeningCountsResponse> addListeningCounts(@Body ListeningCountsRequest listeningCountsRequest);

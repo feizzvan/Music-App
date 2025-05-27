@@ -15,13 +15,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.recent.RecentSongRepository;
 import com.example.musicapp.databinding.FragmentLibraryBinding;
+import com.example.musicapp.ui.SongListAdapter;
 import com.example.musicapp.ui.library.favorite.FavoriteViewModel;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
 import com.example.musicapp.ui.library.recent.RecentSongViewModel;
 import com.example.musicapp.ui.searching.SearchingFragmentDirections;
 import com.example.musicapp.utils.SharedDataUtils;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -36,8 +40,8 @@ public class LibraryFragment extends Fragment {
     private FragmentLibraryBinding mBinding;
     private LibraryViewModel mLibraryViewModel;
     private RecentSongViewModel mRecentSongViewModel;
-    private FavoriteViewModel mFavoriteViewModel;
     private PlaylistViewModel mPlaylistViewModel;
+    private SongListAdapter mAdapter;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
     private int scrollPosition = 0;
 
@@ -46,9 +50,6 @@ public class LibraryFragment extends Fragment {
 
     @Inject
     public PlaylistViewModel.Factory playlistFactory;
-
-    @Inject
-    public FavoriteViewModel.Factory favoriteFactory;
 
     @Inject
     public RecentSongRepository recentSongRepository;
@@ -73,7 +74,6 @@ public class LibraryFragment extends Fragment {
             scrollPosition = savedInstanceState.getInt(SCROLL_POSITION, 0);
             mBinding.scrollViewLibrary.post(() -> mBinding.scrollViewLibrary.setScrollY(scrollPosition));
         }
-
 
         setupView();
         setupViewModel();
@@ -112,16 +112,8 @@ public class LibraryFragment extends Fragment {
                 new ViewModelProvider(requireActivity(), libraryFactory).get(LibraryViewModel.class);
         mRecentSongViewModel =
                 new ViewModelProvider(requireActivity()).get(RecentSongViewModel.class);
-        mFavoriteViewModel =
-                new ViewModelProvider(requireActivity(), favoriteFactory).get(FavoriteViewModel.class);
         mPlaylistViewModel =
                 new ViewModelProvider(requireActivity(), playlistFactory).get(PlaylistViewModel.class);
-
-        mLibraryViewModel.getFavoriteSongs().observe(getViewLifecycleOwner(), songs -> {
-            mFavoriteViewModel.setFavoriteSongs(songs);
-            mLibraryViewModel.setFavoriteSongs(songs);
-            SharedDataUtils.setupPlaylist(songs, FAVOURITE.getValue());
-        });
 
         mLibraryViewModel.getRecentSongs().observe(getViewLifecycleOwner(), songs -> {
             mRecentSongViewModel.setRecentSongs(songs);

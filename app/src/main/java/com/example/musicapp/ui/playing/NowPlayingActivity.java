@@ -26,7 +26,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
-import androidx.media3.session.MediaSession;
 
 import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
@@ -35,8 +34,8 @@ import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.song.SongRepository;
 import com.example.musicapp.databinding.ActivityNowPlayingBinding;
 import com.example.musicapp.service.MusicPlaybackService;
-import com.example.musicapp.ui.dialog.optionmenu.OptionMenuViewModel;
 import com.example.musicapp.ui.dialog.SongOptionMenuDialogFragment;
+import com.example.musicapp.ui.dialog.optionmenu.OptionMenuViewModel;
 import com.example.musicapp.utils.AppUtils;
 import com.example.musicapp.utils.SharedDataUtils;
 import com.example.musicapp.utils.TokenManager;
@@ -44,17 +43,14 @@ import com.example.musicapp.utils.TokenManager;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class NowPlayingActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "NowPlayingActivity";
     private ActivityNowPlayingBinding mBinding;
     private NowPlayingViewModel mNowPlayingViewModel;
-//    private MediaSession mMediaSession;
-        private MediaController mMediaSession;
+    private MediaController mMediaController;
     private Player.Listener mPlayerListener;
     private Handler mHandler;
     private Runnable mCallback;
@@ -75,15 +71,13 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                 MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) iBinder;
                 binder.isMediaControllerInitialized().observe(NowPlayingActivity.this, isInitialized -> {
                     if (isInitialized) {
-                        mMediaSession = binder.getMediaSession();
-                        if (mMediaSession != null) {
-                            Log.d(TAG, "MediaSession initialized successfully");
+                        mMediaController = binder.getMediaSession();
+                        if (mMediaController != null) {
                             setupController();
                             updateSeekBar();
                             updateSeekBarMaxValue();
                             updateDuration();
                         } else {
-                            Log.e(TAG, "MediaSession is null after initialization");
                             Toast.makeText(NowPlayingActivity.this, "MediaSession not available", Toast.LENGTH_SHORT).show();
                         }
                     } else {
@@ -98,8 +92,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mMediaSession = null;
-            Log.w(TAG, "Service disconnected unexpectedly");
+            mMediaController = null;
         }
     };
 
@@ -120,15 +113,6 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         setupAnimator();
         setupViewModel();
         setupView();
-
-        // Observe favorite song ids for UI update
-        SharedDataUtils.getFavoriteSongIdsLiveData().observe(this, ids -> {
-            PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
-            if (playingSong != null && playingSong.getSong() != null) {
-                boolean isFavorite = ids != null && ids.contains(playingSong.getSong().getId());
-                showFavoriteMode(isFavorite);
-            }
-        });
     }
 
     @Override
@@ -166,9 +150,9 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mMediaSession != null) {
-            mMediaSession.removeListener(mPlayerListener);
-            mMediaSession = null;
+        if (mMediaController != null) {
+            mMediaController.removeListener(mPlayerListener);
+            mMediaController = null;
         }
         if (mHandler != null) {
             mHandler.removeCallbacks(mCallback);
@@ -241,13 +225,9 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             if (playingSong != null) {
                 Song song = playingSong.getSong();
                 showSongInfo(song);
-            } else {
-                mBinding.textNowPlayingSongTitle.setText("No Song");
-                mBinding.textNowPlayingSongArtist.setText("Unknown");
-                mBinding.imageNowPlayingArtwork.setImageResource(R.drawable.ic_album);
-                Log.w(TAG, "Playing song is null");
             }
         });
+
         mNowPlayingViewModel.isPlaying().observe(this, isPlaying -> {
             if (isPlaying != null && isPlaying) {
                 if (mRotationAnimator.isPaused()) {
@@ -264,6 +244,16 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             }
         });
 
+        SharedDataUtils.getFavoriteSongsLiveData().observe(this, favoriteSongs -> {
+            Song playingSong = null;
+            if (SharedDataUtils.getPlayingSong().getValue() != null) {
+                playingSong = SharedDataUtils.getPlayingSong().getValue().getSong();
+            }
+            if (playingSong != null) {
+                boolean isFavorite = SharedDataUtils.isFavorite(playingSong.getId());
+                showFavoriteMode(isFavorite);
+            }
+        });
     }
 
     private void setupView() {
@@ -279,8 +269,8 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 String currentTimeLabel = mNowPlayingViewModel.getTimeLabel(progress);
                 mBinding.textCurrentDuration.setText(currentTimeLabel);
-                if (fromUser && mMediaSession != null) {
-                    mMediaSession.seekTo(progress);
+                if (fromUser && mMediaController != null) {
+                    mMediaController.seekTo(progress);
                 }
             }
 
@@ -294,98 +284,21 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-//    private void setupController() {
-//        if (mMediaSession == null) {
-//            Log.e(TAG, "MediaSession is null in setupController");
-//            Toast.makeText(this, "MediaSession not initialized", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        registerMediaController();
-//        try {
-//            String playlistName = SharedDataUtils.getCurrentPlaylistName();
-//            Integer index = SharedDataUtils.getIndexToPlay().getValue();
-//            if (playlistName == null) {
-//                Log.e(TAG, "Playlist name is null");
-//                Toast.makeText(this, "No playlist selected", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//            if (index == null) {
-//                index = 0;
-//                Log.w(TAG, "IndexToPlay is null, defaulting to 0");
-//            }
-//            if (!mMediaSession.getPlayer().isPlaying()) {
-//                MusicPlaybackService service = MusicPlaybackService.getInstance();
-//                if (service != null) {
-//                    Log.d(TAG, "Playing playlist: " + playlistName + ", index: " + index);
-//                    service.setPlaylistAndPlay(index, playlistName);
-//                } else {
-//                    Log.e(TAG, "MusicPlaybackService instance is null");
-//                    Toast.makeText(this, "Playback service not available", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//            if (mMediaSession.getPlayer().isPlaying()) {
-//                mNowPlayingViewModel.setIsPlaying(true);
-//            }
-//        } catch (Exception e) {
-//            Log.e(TAG, "Cannot play song: " + e.getMessage(), e);
-//            Toast.makeText(this, "Cannot play song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
     private void setupController() {
         registerMediaController();
-        if (mMediaSession != null) {
-            if (!mMediaSession.isPlaying()) {
-                mMediaSession.prepare();
-                mMediaSession.play();
+        if (mMediaController != null) {
+            if (!mMediaController.isPlaying()) {
+                mMediaController.prepare();
+                mMediaController.play();
             }
-            if (mMediaSession.isPlaying()) {
+            if (mMediaController.isPlaying()) {
                 mNowPlayingViewModel.setIsPlaying(true);
             }
         }
     }
 
-//    private void registerMediaController() {
-//        if (mMediaSession == null) {
-//            Log.e(TAG, "MediaSession is null in registerMediaController");
-//            return;
-//        }
-//        mPlayerListener = new Player.Listener() {
-//            @Override
-//            public void onIsPlayingChanged(boolean isPlaying) {
-//                mNowPlayingViewModel.setIsPlaying(isPlaying);
-//            }
-//
-//            @Override
-//            public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
-//                updateSeekBarMaxValue();
-//                updateDuration();
-//                if (mMediaSession != null) {
-//                    Player player = mMediaSession.getPlayer();
-//                    if (player != null) {
-//                        if (player.isPlaying()) {
-//                            mRotationAnimator.start();
-//                        }
-//                        int currentIndex = player.getCurrentMediaItemIndex();
-//                        SharedDataUtils.setIndexToPlay(currentIndex);
-//                        Log.d(TAG, "Media item transitioned, new index: " + currentIndex);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onPlaybackStateChanged(int playbackState) {
-//                if (playbackState == Player.STATE_READY) {
-//                    updateSeekBarMaxValue();
-//                    updateDuration();
-//                }
-//            }
-//        };
-//        mMediaSession.getPlayer().addListener(mPlayerListener);
-//    }
-
     private void registerMediaController() {
-        if (mMediaSession != null) {
+        if (mMediaController != null) {
             mPlayerListener = new Player.Listener() {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
@@ -396,7 +309,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                 public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
                     updateSeekBarMaxValue();
                     updateDuration();
-                    if (mMediaSession.isPlaying()) {
+                    if (mMediaController.isPlaying()) {
                         mRotationAnimator.start();
                     }
                 }
@@ -409,7 +322,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                     }
                 }
             };
-            mMediaSession.addListener(mPlayerListener);
+            mMediaController.addListener(mPlayerListener);
         }
     }
 
@@ -420,80 +333,72 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             showRepeatMode();
             showShuffleMode();
 
-            boolean isFavorite = mNowPlayingViewModel.isFavorite(song.getId());
+            boolean isFavorite = SharedDataUtils.isFavorite(song.getId());
             showFavoriteMode(isFavorite);
-//            mBinding.textNowPlayingAlbum.setText(song.getAlbum);
+
+//            String playlistName = SharedDataUtils.getCurrentPlaylistName();
+            mBinding.textNowPlayingAlbum.setText(song.getGenreName());
             mBinding.textNowPlayingSongTitle.setText(song.getTitle());
-            mBinding.textNowPlayingSongArtist
-                    .setText(song.getArtistName() != null ? String.valueOf(song.getArtistName()) : "Unknown");
+            mBinding.textNowPlayingSongArtist.setText(song.getArtistName());
             Glide.with(this)
                     .load(song.getImageUrl())
                     .circleCrop()
                     .error(R.drawable.ic_album)
                     .into(mBinding.imageNowPlayingArtwork);
         } else {
-            mBinding.textNowPlayingSongTitle.setText("No Song");
-            mBinding.textNowPlayingSongArtist.setText("Unknown");
+            mBinding.textNowPlayingSongTitle.setText(R.string.text_unknown);
+            mBinding.textNowPlayingSongArtist.setText(R.string.text_unknown);
             mBinding.imageNowPlayingArtwork.setImageResource(R.drawable.ic_album);
-            Log.w(TAG, "Song is null in showSongInfo");
         }
     }
 
     private void setupActionPlayPause() {
-        if (mMediaSession != null) {
-            if (mMediaSession.isPlaying()) {
-                mMediaSession.pause();
+        if (mMediaController != null) {
+            if (mMediaController.isPlaying()) {
+                mMediaController.pause();
             } else {
-                mMediaSession.play();
+                mMediaController.play();
             }
-        } else {
-            Log.e(TAG, "MediaSession is null in setupActionPlayPause");
         }
     }
 
     private void setupActionSkipPrevious() {
-        if (mMediaSession != null && mMediaSession.hasPreviousMediaItem()) {
-            mMediaSession.seekToPreviousMediaItem();
+        if (mMediaController != null && mMediaController.hasPreviousMediaItem()) {
+            mMediaController.seekToPreviousMediaItem();
             mRotationAnimator.end();
-        } else {
-            Log.w(TAG, "No previous media item or MediaSession is null");
         }
     }
 
     private void setupActionSkipNext() {
-        if (mMediaSession != null && mMediaSession.hasNextMediaItem()) {
-            mMediaSession.seekToNextMediaItem();
+        if (mMediaController != null && mMediaController.hasNextMediaItem()) {
+            mMediaController.seekToNextMediaItem();
             mRotationAnimator.end();
-        } else {
-            Log.w(TAG, "No next media item or MediaSession is null");
         }
     }
 
     private void setupActionRepeat() {
-        if (mMediaSession != null) {
-            int repeatMode = mMediaSession.getRepeatMode();
+        if (mMediaController != null) {
+            int repeatMode = mMediaController.getRepeatMode();
             switch (repeatMode) {
                 case Player.REPEAT_MODE_OFF:
                     mBinding.btnRepeat.setImageResource(R.drawable.ic_repeat_one);
-                    mMediaSession.setRepeatMode(Player.REPEAT_MODE_ONE);
+                    mMediaController.setRepeatMode(Player.REPEAT_MODE_ONE);
                     break;
                 case Player.REPEAT_MODE_ONE:
                     mBinding.btnRepeat.setImageResource(R.drawable.ic_repeat_all);
-                    mMediaSession.setRepeatMode(Player.REPEAT_MODE_ALL);
+                    mMediaController.setRepeatMode(Player.REPEAT_MODE_ALL);
                     break;
                 case Player.REPEAT_MODE_ALL:
                     mBinding.btnRepeat.setImageResource(R.drawable.ic_repeat_off);
-                    mMediaSession.setRepeatMode(Player.REPEAT_MODE_OFF);
+                    mMediaController.setRepeatMode(Player.REPEAT_MODE_OFF);
                     break;
             }
-        } else {
-            Log.e(TAG, "MediaSession is null in setupActionRepeat");
         }
     }
 
     private void showRepeatMode() {
-        if (mMediaSession != null) {
-            int repeatMode = mMediaSession.getRepeatMode();
+        if (mMediaController != null) {
+            int repeatMode = mMediaController.getRepeatMode();
             switch (repeatMode) {
                 case Player.REPEAT_MODE_OFF:
                     mBinding.btnRepeat.setImageResource(R.drawable.ic_repeat_off);
@@ -509,18 +414,16 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void setupActionShuffle() {
-        if (mMediaSession != null) {
-            boolean isShuffle = mMediaSession.getShuffleModeEnabled();
-            mMediaSession.setShuffleModeEnabled(!isShuffle);
+        if (mMediaController != null) {
+            boolean isShuffle = mMediaController.getShuffleModeEnabled();
+            mMediaController.setShuffleModeEnabled(!isShuffle);
             showShuffleMode();
-        } else {
-            Log.e(TAG, "MediaSession is null in setupActionShuffle");
         }
     }
 
     private void showShuffleMode() {
-        if (mMediaSession != null) {
-            boolean isShuffle = mMediaSession.getShuffleModeEnabled();
+        if (mMediaController != null) {
+            boolean isShuffle = mMediaController.getShuffleModeEnabled();
             mBinding.btnShuffle.setImageResource(isShuffle ? R.drawable.ic_shuffle_on : R.drawable.ic_shuffle_off);
         }
     }
@@ -531,49 +434,20 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
 
         if (playingSong != null) {
             song = playingSong.getSong();
-        } else {
-            Log.w(TAG, "No playing song available for favorite action");
         }
 
         if (song != null) {
             int userId = tokenManager.getUserId();
             int songId = song.getId();
             Log.d("FAVORITE", "Add userId=" + userId + ", songId=" + songId);
-            boolean isFavorite = mNowPlayingViewModel.isFavorite(songId);
+            boolean isFavorite = SharedDataUtils.isFavorite(songId);
 
             if (isFavorite) {
-                // Đã yêu thích, gọi API xóa
-                mDisposable.add(mNowPlayingViewModel.removeFavorite(userId, songId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                response -> {
-                                    mNowPlayingViewModel.removeFavoriteId(songId);
-                                    showFavoriteMode(false);
-                                    Toast.makeText(this, "Đã bỏ khỏi yêu thích", Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> {
-                                    Toast.makeText(this, "Bỏ yêu thích thất bại!", Toast.LENGTH_SHORT).show();
-                                }
-                        )
-                );
+                mNowPlayingViewModel.removeFavoriteAndSync(song);
+                showFavoriteMode(false);
             } else {
-                // Chưa yêu thích, gọi API thêm
-                mDisposable.add(mNowPlayingViewModel.addFavorite(userId, songId)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(
-                                        response -> {
-                                            mNowPlayingViewModel.addFavoriteId(songId);
-                                            showFavoriteMode(true);
-                                            Toast.makeText(this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
-                                        },
-                                        throwable -> {
-                                            Log.e(TAG, "Favorite add error: ", throwable);
-                                            Toast.makeText(this, "Thêm vào yêu thích thất bại!", Toast.LENGTH_SHORT).show();
-                                        }
-                                )
-                );
+                mNowPlayingViewModel.addFavoriteAndSync(song);
+                showFavoriteMode(true);
             }
         }
     }
@@ -588,8 +462,8 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         mCallback = new Runnable() {
             @Override
             public void run() {
-                if (mMediaSession != null) {
-                    int currentPos = (int) mMediaSession.getCurrentPosition();
+                if (mMediaController != null) {
+                    int currentPos = (int) mMediaController.getCurrentPosition();
                     mBinding.seekBarNowPlaying.setProgress(currentPos);
                 }
                 mHandler.postDelayed(this, 1000);
@@ -599,18 +473,18 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void updateSeekBarMaxValue() {
-        if (mMediaSession != null) {
-            long duration = mMediaSession.getDuration();
+        if (mMediaController != null) {
+            long duration = mMediaController.getDuration();
             int seekBarMaxValue = duration <= Integer.MAX_VALUE ? (int) duration : 0;
-            int progress = (int) mMediaSession.getCurrentPosition();
+            int progress = (int) mMediaController.getCurrentPosition();
             mBinding.seekBarNowPlaying.setProgress(progress);
             mBinding.seekBarNowPlaying.setMax(seekBarMaxValue);
         }
     }
 
     private void updateDuration() {
-        if (mMediaSession != null) {
-            String timeLabel = mNowPlayingViewModel.getTimeLabel(mMediaSession.getDuration());
+        if (mMediaController != null) {
+            String timeLabel = mNowPlayingViewModel.getTimeLabel(mMediaController.getDuration());
             mBinding.textTotalDuration.setText(timeLabel);
         }
     }

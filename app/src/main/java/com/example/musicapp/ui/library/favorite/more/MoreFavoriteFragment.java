@@ -2,20 +2,18 @@ package com.example.musicapp.ui.library.favorite.more;
 
 import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.FAVOURITE;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.example.musicapp.databinding.FragmentMoreFavoriteBinding;
 import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.SongListAdapter;
+import com.example.musicapp.utils.SharedDataUtils;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -53,9 +51,7 @@ public class MoreFavoriteFragment extends AppBaseFragment {
     }
 
     private void setupViewModel() {
-        MoreFavoriteViewModel moreFavoriteViewModel =
-                new ViewModelProvider(requireActivity()).get(MoreFavoriteViewModel.class);
-        moreFavoriteViewModel.getFavoriteSongs()
+        SharedDataUtils.getFavoriteSongsLiveData()
                 .observe(getViewLifecycleOwner(), songs -> mSongListAdapter.updateSongs(songs));
     }
 }

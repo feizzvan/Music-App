@@ -110,7 +110,6 @@
     <string name="favorite_remove_failed">"Xóa mục ưa thích không thành công: "</string>
     <string name="favorite_get_failed">"Yêu thích bị thất bại: "</string>
     <string name="add_to_favorite_success">Bài hát đã được thêm vào mục yêu thích thành công!</string>
-    <string name="error_add_to_favorite">Bài hát này đã có trong mục yêu thích!</string>
     <string name="error_song_already_playlist">Bài hát đã có trong danh sách phát này!</string>
     <string name="text_songs">%1$d bài hát</string>
     <string name="listening_counts_add_failed">"Thêm số lượt nghe thất bại: "</string>
@@ -120,4 +119,12 @@
     <string name="title_change_password">Đổi mật khẩu</string>
     <string name="title_account">Tài khoản</string>
     <string name="text_email_does_not_exist_or_is_not_registered">Email không tồn tại hoặc chưa được đăng ký.</string>
+    <string name="text_unknown">Không rõ</string>
+    <string name="playlist_default">Mặc định</string>
+    <string name="playlist_favourite">Yêu thích</string>
+    <string name="playlist_recommended">Đề xuất</string>
+    <string name="playlist_recent">Gần đây</string>
+    <string name="playlist_searched">Đã tìm</string>
+    <string name="playlist_most_heard">Nghe nhiều</string>
+    <string name="playlist_custom">Tuỳ chỉnh</string>
 </resources>

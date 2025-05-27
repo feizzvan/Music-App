@@ -22,9 +22,7 @@ import io.reactivex.rxjava3.core.Flowable;
 public class LibraryViewModel extends ViewModel {
     private final RecentSongRepository mRecentSongRepository;
     private final PlaylistRepositoryImpl mPlaylistRepository;
-
     private final MutableLiveData<List<Song>> mRecentSongs = new MutableLiveData<>();
-    private final MutableLiveData<List<Song>> mFavoriteSongs = new MutableLiveData<>();
 
     @Inject
     public LibraryViewModel(RecentSongRepository recentSongRepository,
@@ -44,14 +42,6 @@ public class LibraryViewModel extends ViewModel {
 
     public LiveData<List<Song>> getRecentSongs() {
         return mRecentSongs;
-    }
-
-    public void setFavoriteSongs(List<Song> favoriteSongs) {
-        mFavoriteSongs.postValue(favoriteSongs);
-    }
-
-    public LiveData<List<Song>> getFavoriteSongs() {
-        return mFavoriteSongs;
     }
 
     public static class Factory implements ViewModelProvider.Factory {

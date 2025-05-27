@@ -111,7 +111,6 @@
     <string name="favorite_remove_failed">"Favorite remove failed: "</string>
     <string name="favorite_get_failed">"Favorite get failed: "</string>
     <string name="add_to_favorite_success">The song has been add to the favorite successfully!</string>
-    <string name="error_add_to_favorite">This song already exists in favorite!</string>
     <string name="error_song_already_playlist">The song is already in this playlist!</string>
     <string name="text_songs">%1$d songs</string>
     <string name="listening_counts_add_failed">"Listening counts add failed: "</string>
@@ -121,4 +120,12 @@
     <string name="title_change_password">Change password</string>
     <string name="title_account">Account</string>
     <string name="text_email_does_not_exist_or_is_not_registered">Email does not exist or is not registered.</string>
+    <string name="text_unknown">Unknown</string>
+    <string name="playlist_default">default</string>
+    <string name="playlist_favourite">favourite</string>
+    <string name="playlist_recommended">recommended</string>
+    <string name="playlist_recent">recent</string>
+    <string name="playlist_searched">searched</string>
+    <string name="playlist_most_heard">most_heard</string>
+    <string name="playlist_custom">custom</string>
 </resources>

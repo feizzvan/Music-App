@@ -128,20 +128,19 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
             return;
         }
 
-        AddToPlaylistDialog dialog = new AddToPlaylistDialog(song, playlist -> {
-            mDisposable.add(mPlaylistViewModel.addSongToPlaylist(playlist.getId(), song.getId())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(() -> {
-                                String message = getString(R.string.add_to_playlist_success, playlist.getName());
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                            }, error -> {
-                                String message = getString(R.string.error_add_to_playlist);
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                            }
-                    )
-            );
-        });
+        AddToPlaylistDialog dialog = new AddToPlaylistDialog(song, playlist ->
+                mDisposable.add(mPlaylistViewModel.addSongToPlaylist(playlist.getId(), song.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> {
+                                    String message = getString(R.string.add_to_playlist_success, playlist.getName());
+                                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                                }, error -> {
+                                    String message = getString(R.string.error_add_to_playlist);
+                                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                                }
+                        )
+                ));
 
         dialog.show(requireActivity().getSupportFragmentManager(), AddToPlaylistDialog.TAG);
     }
@@ -149,7 +148,12 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
     private void handleAddToFavorite() {
         Song song = mOptionMenuViewModel.getSong().getValue();
         if (song == null) {
-            Toast.makeText(requireContext(), "No song selected", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(requireContext(), "No song selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (SharedDataUtils.isFavorite(song.getId())) {
+            dismiss();
             return;
         }
 
@@ -160,13 +164,11 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                            SharedDataUtils.addFavoriteId(song.getId());
+                            SharedDataUtils.addFavoriteSong(song);
                             String message = getString(R.string.add_to_favorite_success);
                             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
                             dismiss();
                         }, throwable -> {
-                            String message = getString(R.string.error_add_to_favorite);
-                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
                         }
                 )
         );

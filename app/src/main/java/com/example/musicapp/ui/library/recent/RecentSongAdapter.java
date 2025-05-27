@@ -80,7 +80,7 @@ public class RecentSongAdapter extends RecyclerView.Adapter<RecentSongAdapter.Vi
 
         public void bind(Song song, int position) {
             mBinding.textItemSongTitle.setText(song.getTitle());
-            mBinding.textItemSongArtist.setText(song.getArtistId());
+            mBinding.textItemSongArtist.setText(song.getArtistName());
             Glide.with(mBinding.getRoot().getContext())
                     .load(song.getImageUrl())
                     .error(R.drawable.ic_music_note)
