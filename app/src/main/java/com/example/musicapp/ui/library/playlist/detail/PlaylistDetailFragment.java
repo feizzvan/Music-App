@@ -1,6 +1,7 @@
 package com.example.musicapp.ui.library.playlist.detail;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
 import com.example.musicapp.data.model.playlist.Playlist;
-import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.databinding.FragmentPlaylistDetailBinding;
 import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.SongListAdapter;
 import com.example.musicapp.utils.SharedDataUtils;
+import com.example.musicapp.utils.TokenManager;
 
 import java.util.ArrayList;
 
@@ -27,8 +28,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class PlaylistDetailFragment extends AppBaseFragment {
     private FragmentPlaylistDetailBinding mBinding;
-    private SongListAdapter mAdaper;
+    private SongListAdapter mAdapter;
     private PlaylistDetailViewModel mPlaylistDetailViewModel;
+
+    @Inject
+    public TokenManager tokenManager;
 
     @Inject
     public PlaylistDetailViewModel.Factory factory;
@@ -43,10 +47,11 @@ public class PlaylistDetailFragment extends AppBaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        mPlaylistDetailViewModel =
+                new ViewModelProvider(requireActivity(), factory).get(PlaylistDetailViewModel.class);
+        setupView();
         setupViewModel();
         setupPlaylistData();
-        setupView();
     }
 
     private void setupPlaylistData() {
@@ -59,7 +64,7 @@ public class PlaylistDetailFragment extends AppBaseFragment {
                 view -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
         String toolBarTitle = getString(R.string.title_playlist_detail);
         mBinding.includePlaylistDetail.textToolbarTitle.setText(toolBarTitle);
-        mAdaper = new SongListAdapter(
+        mAdapter = new SongListAdapter(
                 (song, index) -> {
                     Playlist playlist = mPlaylistDetailViewModel.getPlaylist().getValue();
                     if (playlist != null) {
@@ -72,19 +77,19 @@ public class PlaylistDetailFragment extends AppBaseFragment {
                 },
                 this::showOptionMenu
         );
-        mBinding.includePlaylistDetail.includeSongList.rvSongList.setAdapter(mAdaper);
+        mBinding.includePlaylistDetail.includeSongList.rvSongList.setAdapter(mAdapter);
     }
 
     private void setupViewModel() {
         mPlaylistDetailViewModel =
                 new ViewModelProvider(requireActivity(), factory).get(PlaylistDetailViewModel.class);
-        mPlaylistDetailViewModel.getPlaylist()
-                .observe(getViewLifecycleOwner(), playlist -> {
+        mPlaylistDetailViewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
                     if (playlist != null) {
-                        mAdaper.updateSongs(playlist.getSongs() != null ? playlist.getSongs() : new ArrayList<>());
+                        mAdapter.updateSongs(playlist.getSongs() != null ? playlist.getSongs() : new ArrayList<>());
                         showPlaylistInfo(playlist);
                     }
-                });
+                }
+        );
     }
 
     private void showPlaylistInfo(Playlist playlist) {

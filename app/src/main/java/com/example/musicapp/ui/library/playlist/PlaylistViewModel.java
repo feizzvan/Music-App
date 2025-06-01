@@ -1,7 +1,7 @@
 package com.example.musicapp.ui.library.playlist;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.musicapp.data.model.playlist.CreatePlaylist;
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.playlist.PlaylistById;
-import com.example.musicapp.data.model.playlist.PlaylistByUserId;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.playlist.PlaylistRepositoryImpl;
 import com.example.musicapp.utils.TokenManager;
@@ -23,17 +22,18 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @HiltViewModel
 public class PlaylistViewModel extends ViewModel {
     private final PlaylistRepositoryImpl mPlaylistRepository;
     private final TokenManager tokenManager;
     private final MutableLiveData<List<Playlist>> mPlaylists = new MutableLiveData<>();
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Inject
     public PlaylistViewModel(PlaylistRepositoryImpl playlistRepository, TokenManager tokenManager) {
@@ -51,117 +51,87 @@ public class PlaylistViewModel extends ViewModel {
 
     public Single<PlaylistById> createPlaylist(String playlistName) {
         int userId = tokenManager.getUserId();
+        String token = "Bearer " + tokenManager.getToken();
         CreatePlaylist createPlaylist = new CreatePlaylist(playlistName, userId, null);
-        return mPlaylistRepository.createPlaylist(createPlaylist);
-    }
-
-    public Single<PlaylistById> updatePlaylist(String playlistName) {
-        int userId = tokenManager.getUserId();
-        CreatePlaylist createPlaylist = new CreatePlaylist(playlistName, userId, null);
-        return mPlaylistRepository.createPlaylist(createPlaylist);
+        return mPlaylistRepository.createPlaylist(token, createPlaylist)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void loadPlaylistByUserId(int userId) {
-        mPlaylistRepository.loadPlaylistByUserId(userId, new Callback<PlaylistByUserId>() {
-            @Override
-            public void onResponse(@NonNull Call<PlaylistByUserId> call, @NonNull Response<PlaylistByUserId> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Playlist> playlists = response.body().getPlaylists();
-                    mPlaylists.postValue(playlists);
-                    Log.d("PlaylistViewModel", "Loaded playlists for user " + userId + ": " + playlists.size());
-                } else {
-                    mPlaylists.postValue(new ArrayList<>());
-                    Log.e("PlaylistViewModel", "Failed to load playlists: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<PlaylistByUserId> call, @NonNull Throwable throwable) {
-                mPlaylists.postValue(new ArrayList<>());
-                Log.e("PlaylistViewModel", "Error loading playlists: " + throwable.getMessage());
-            }
-        });
+        String token = "Bearer " + tokenManager.getToken();
+        mDisposable.add(mPlaylistRepository.loadPlaylistByUserId(token, userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(playlistByUserId -> {
+                            List<Playlist> playlists = playlistByUserId.getPlaylists();
+                            mPlaylists.postValue(playlists);
+                        }, throwable -> mPlaylists.postValue(new ArrayList<>())
+                )
+        );
     }
 
-    public void loadPlaylistById(int playlistId) {
-        mPlaylistRepository.loadPlaylistById(playlistId, new Callback<PlaylistById>() {
-            @Override
-            public void onResponse(@NonNull Call<PlaylistById> call, @NonNull Response<PlaylistById> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Playlist playlist = response.body().getData();
-                    List<Playlist> currentPlaylists = mPlaylists.getValue() != null ? new ArrayList<>(mPlaylists.getValue()) : new ArrayList<>();
-                    int index = -1;
-                    for (int i = 0; i < currentPlaylists.size(); i++) {
-                        if (currentPlaylists.get(i).getId() == playlistId) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    if (index != -1) {
-                        currentPlaylists.set(index, playlist);
-                    } else {
-                        currentPlaylists.add(playlist);
-                    }
-                    mPlaylists.postValue(currentPlaylists);
-                    Log.d("PlaylistViewModel", "Playlist fetched by ID: " + playlist.getName() + ", Song count: " + (playlist.getSongs() != null ? playlist.getSongs().size() : 0));
-                } else {
-                    Log.e("PlaylistViewModel", "Failed to fetch playlist: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<PlaylistById> call, @NonNull Throwable throwable) {
-                Log.e("PlaylistViewModel", "Error fetching playlist: " + throwable.getMessage());
-            }
-        });
-    }
+//    public void loadPlaylistById(int playlistId) {
+//        mPlaylistRepository.loadPlaylistById(playlistId, new Callback<PlaylistById>() {
+//            @Override
+//            public void onResponse(@NonNull Call<PlaylistById> call, @NonNull Response<PlaylistById> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    Playlist playlist = response.body().getData();
+//                    List<Playlist> currentPlaylists = mPlaylists.getValue() != null ? new ArrayList<>(mPlaylists.getValue()) : new ArrayList<>();
+//                    int index = -1;
+//                    for (int i = 0; i < currentPlaylists.size(); i++) {
+//                        if (currentPlaylists.get(i).getId() == playlistId) {
+//                            index = i;
+//                            break;
+//                        }
+//                    }
+//                    if (index != -1) {
+//                        currentPlaylists.set(index, playlist);
+//                    } else {
+//                        currentPlaylists.add(playlist);
+//                    }
+//                    mPlaylists.postValue(currentPlaylists);
+//                    Log.d("PlaylistViewModel", "Playlist fetched by ID: " + playlist.getName() + ", Song count: " + (playlist.getSongs() != null ? playlist.getSongs().size() : 0));
+//                } else {
+//                    Log.e("PlaylistViewModel", "Failed to fetch playlist: " + response.message());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<PlaylistById> call, @NonNull Throwable throwable) {
+//                Log.e("PlaylistViewModel", "Error fetching playlist: " + throwable.getMessage());
+//            }
+//        });
+//    }
 
     public Completable addSongToPlaylist(int playlistId, int currentSongId) {
-        return Completable.create(emitter -> {
-            mPlaylistRepository.loadPlaylistById(playlistId, new Callback<PlaylistById>() {
-                @SuppressLint("CheckResult")
-                @Override
-                public void onResponse(@NonNull Call<PlaylistById> call, @NonNull Response<PlaylistById> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        Playlist playlist = response.body().getData();
-                        List<Integer> songIds = playlist.getSongs() != null ?
-                                playlist.getSongs().stream()
-                                        .map(Song::getId)
-                                        .collect(Collectors.toList()) :
-                                new ArrayList<>();
-                        if (!songIds.contains(currentSongId)) {
-                            songIds.add(currentSongId);
-                        }
-                        CreatePlaylist createPlaylist = new CreatePlaylist(
-                                playlist.getName(),
-                                tokenManager.getUserId(),
-                                songIds
-                        );
-                        mPlaylistRepository.updatePlayList(playlistId, createPlaylist)
-                                .subscribe(
-                                        updatedPlaylist -> {
-                                            Log.d("PlaylistViewModel", "Playlist updated: " + updatedPlaylist.getData().getName() + ", Song count: " + (updatedPlaylist.getData().getSongs() != null ? updatedPlaylist.getData().getSongs().size() : 0));
-                                            loadPlaylistByUserId(tokenManager.getUserId());
-                                            emitter.onComplete();
-                                        },
-                                        throwable -> {
-                                            Log.e("PlaylistViewModel", "Failed to update playlist: " + throwable.getMessage());
-                                            emitter.onError(throwable);
-                                        }
-                                );
-                    } else {
-                        Log.e("PlaylistViewModel", "Failed to fetch playlist: " + response.message());
-                        emitter.onError(new Exception("Failed to fetch playlist: " + response.message()));
+        String token = "Bearer " + tokenManager.getToken();
+        return mPlaylistRepository.loadPlaylistById(token, playlistId)
+                .subscribeOn(Schedulers.io())
+                .flatMapCompletable(playlistById -> {
+                    Playlist playlist = playlistById.getData();
+                    List<Integer> songIds = playlist.getSongs() != null
+                            ? playlist.getSongs().stream().map(Song::getId).collect(Collectors.toList())
+                            : new ArrayList<>();
+                    if (!songIds.contains(currentSongId)) {
+                        songIds.add(currentSongId);
                     }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<PlaylistById> call, @NonNull Throwable throwable) {
-                    Log.e("PlaylistViewModel", "Error fetching playlist: " + throwable.getMessage());
-                    emitter.onError(throwable);
-                }
-            });
-        });
+                    CreatePlaylist createPlaylist = new CreatePlaylist(
+                            playlist.getName(),
+                            tokenManager.getUserId(),
+                            songIds
+                    );
+                    return mPlaylistRepository.updatePlaylist(token, playlistId, createPlaylist)
+                            .subscribeOn(Schedulers.io())
+                            .doOnSuccess(updatedPlaylist -> {
+                                Log.d("PlaylistViewModel", "Playlist updated: " + updatedPlaylist.getData().getName() +
+                                        ", Song count: " + (updatedPlaylist.getData().getSongs() != null ? updatedPlaylist.getData().getSongs().size() : 0));
+                                loadPlaylistByUserId(tokenManager.getUserId());
+                            })
+                            .doOnError(throwable -> Log.e("PlaylistViewModel", "Failed to update playlist: " + throwable.getMessage()))
+                            .ignoreElement();
+                })
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public static class Factory implements ViewModelProvider.Factory {
@@ -182,5 +152,11 @@ public class PlaylistViewModel extends ViewModel {
             }
             throw new IllegalArgumentException("Unknown ViewModel class");
         }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        mDisposable.clear();
     }
 }

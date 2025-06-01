@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +57,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     private ObjectAnimator mRotationAnimator;
 
     private final CompositeDisposable mDisposable = new CompositeDisposable();
-    private float currentFraction = 0f;
+//    private float currentFraction = 0f;
 
     @Inject
     SongRepository.Local localSongRepository;
@@ -72,11 +73,11 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                 if (result.getResultCode() == RESULT_OK) {
                     Intent data = result.getData();
                     if (data != null) {
-                        float fraction = data.getFloatExtra(AppUtils.EXTRA_CURRENT_FRACTION, 0f);
+                        float currentFraction = data.getFloatExtra(AppUtils.EXTRA_CURRENT_FRACTION, 0f);
                         mRotationAnimator.setCurrentFraction(currentFraction);
-                        currentFraction = fraction;
+//                        currentFraction = fraction;
                     } else {
-                        currentFraction = 0f;
+//                        currentFraction = 0f;
                     }
                 }
             }
@@ -89,10 +90,10 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
             binder.isMediaControllerInitialized().observe(MiniPlayerFragment.this, isInitialized -> {
                 if (isInitialized) {
                     if (mMediaController == null) {
-                        mMediaController = binder.getMediaSession();
+                        mMediaController = binder.getMediaController();
 
                         setupViewModel();
-                        setMediaSession(mMediaController);
+                        setMediaController(mMediaController);
                         setupObserveControllerData();
                     }
                 }
@@ -118,7 +119,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
 
         setupAnimator();
         setupListener();
-        setupViewModel();
+//        setupViewModel();
     }
 
     @Override
@@ -225,17 +226,15 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void setupPlayPauseAction() {
-        if (mMediaController != null) {
-            if (mMediaController.isPlaying()) {
-                mMediaController.pause();
-            } else {
-                mMediaController.play();
-            }
+        if (mMediaController.isPlaying()) {
+            mMediaController.pause();
+        } else {
+            mMediaController.play();
         }
     }
 
     private void setupNextAction() {
-        if (mMediaController != null && mMediaController.hasNextMediaItem()) {
+        if (mMediaController.hasNextMediaItem()) {
             mMediaController.seekToNext();
             mRotationAnimator.end();
         }
@@ -265,7 +264,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void updatePlayingState(Boolean isPlaying) {
-        if (isPlaying != null && isPlaying) {
+        if (isPlaying) {
             mBinding.btnMiniPlayerPlayPause.setImageResource(R.drawable.ic_pause);
             if (mRotationAnimator.isPaused()) {
                 mRotationAnimator.resume();
@@ -278,7 +277,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    private void setMediaSession(MediaController mediaSession) {
+    private void setMediaController(MediaController mediaSession) {
         mMediaController = mediaSession;
         mPlayerListener = new Player.Listener() {
             @Override
@@ -311,6 +310,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
 
         mMiniPlayerViewModel.getMediaItems().observe(getViewLifecycleOwner(), mediaItems -> {
             if (mMediaController != null) {
+                Log.d("MiniPlayer", "setupObserveControllerData: " + mediaItems);
                 mMediaController.setMediaItems(mediaItems);
             }
         });
@@ -334,8 +334,8 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                         && playlist.getName().compareTo(SEARCHED.getValue()) == 0;
                 if (condition1 || condition2 || condition3) {
                     mMediaController.seekTo(index, 0);
-//                    mMediaController.getPlayer().prepare();
-                    mMediaController.play();
+                    mMediaController.prepare();
+//                    mMediaController.play();
                 }
             }
         });

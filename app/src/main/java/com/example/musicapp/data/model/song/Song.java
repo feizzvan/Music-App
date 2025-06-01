@@ -180,6 +180,6 @@ public class Song {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mId);
+        return Objects.hash(mId);
     }
 }

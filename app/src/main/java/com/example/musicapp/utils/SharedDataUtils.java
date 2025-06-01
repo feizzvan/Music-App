@@ -95,12 +95,15 @@ public final class SharedDataUtils {
     }
 
     public static void setupPreviousSessionPlayingSong(String songId, String playlistName) {
-        mPlaylistName = playlistName;
+        int index;
+//        mPlaylistName = playlistName;
         Playlist playlist = getPlaylist(playlistName);
         if (playlist == null) {
             playlist = getPlaylist(DEFAULT.getValue());
         }
         if (songId != null && playlistName != null) {
+            // gọi thiết lập playlist trước khi thực hiện các hành động khác
+            // để đảm bảo playlist đã tồn tại khi gọi thiết lập index to play
             boolean buildInPlaylist = isBuildInPlaylist(playlistName);
             if (buildInPlaylist) {
                 setCurrentPlaylist(playlistName);
@@ -108,6 +111,19 @@ public final class SharedDataUtils {
                 setCurrentPlaylist(DEFAULT.getValue());
             }
             mPlayingSong.setPlaylist(playlist);
+            List<Song> songList = playlist.getSongs();
+            int id = Integer.parseInt(songId);
+            Song searchSong = new Song(id); // Sử dụng hàm tạo Song(int)
+            index = songList.indexOf(searchSong);
+            if (index >= 0 && songList.size() > index) {
+                Song song = songList.get(index);
+                mPlayingSong.setSong(song);
+                mPlayingSong.setCurrentSongIndex(index);
+            }
+
+            //update song when config changed
+            setPlayingSong(mPlayingSong);
+            setIndexToPlay(index);
         }
     }
 
@@ -133,14 +149,14 @@ public final class SharedDataUtils {
         return mPlaylistLiveData;
     }
 
-    public static String getCurrentPlaylistName() {
-        return mPlaylistName;
-    }
+//    public static String getCurrentPlaylistName() {
+//        return mPlaylistName;
+//    }
 
     public static void setCurrentPlaylist(String playlistName) {
         Playlist playlist = getPlaylist(playlistName);
         if (playlist != null) {
-            mPlaylistName = playlistName;
+//            mPlaylistName = playlistName;
             mPlaylistLiveData.setValue(playlist);
             mPlayingSong.setPlaylist(playlist);
         }
@@ -150,13 +166,13 @@ public final class SharedDataUtils {
         return mPlaylistMap.getOrDefault(playlistName, null);
     }
 
-    public static List<Song> getPlaylistSongs(String playlistName) {
-        Playlist playlist = getPlaylist(playlistName);
-        if (playlist != null) {
-            return playlist.getSongs();
-        }
-        return new ArrayList<>();
-    }
+//    public static List<Song> getPlaylistSongs(String playlistName) {
+//        Playlist playlist = getPlaylist(playlistName);
+//        if (playlist != null) {
+//            return playlist.getSongs();
+//        }
+//        return new ArrayList<>();
+//    }
 
     public static LiveData<PlayingSong> getPlayingSong() {
         return mPlayingSongLiveData;
@@ -181,21 +197,23 @@ public final class SharedDataUtils {
         if (playlist != null) {
             playlist.updateSongs(songs);
             mPlaylistMap.put(playlistName, playlist);
-        } else {
-            playlist = new Playlist(-1, playlistName);
-            playlist.updateSongs(songs);
-            mPlaylistMap.put(playlistName, playlist);
         }
+//        else {
+//            playlist = new Playlist(-1, playlistName);
+//            playlist.updateSongs(songs);
+//            mPlaylistMap.put(playlistName, playlist);
+//        }
     }
 
     public static void addPlaylist(Playlist playlist) {
-        if (!mPlaylistMap.containsKey(playlist.getName())) {
-            mPlaylistMap.put(playlist.getName(), playlist);
-        }
+//        if (!mPlaylistMap.containsKey(playlist.getName())) {
+//            mPlaylistMap.put(playlist.getName(), playlist);
+//        }
+        mPlaylistMap.put(playlist.getName(), playlist);
     }
 
     public static void setPlayingSong(int index) {
-        if (index > -1 && mPlayingSong.getPlaylist() != null && mPlayingSong.getPlaylist().getSongs().size() > index) {
+        if (index > -1 && mPlayingSong.getPlaylist().getSongs().size() > index) {
             Song song = mPlayingSong.getPlaylist().getSongs().get(index);
             mPlayingSong.setSong(song);
             mPlayingSong.setCurrentSongIndex(index);
@@ -209,7 +227,7 @@ public final class SharedDataUtils {
 
     public static void setIndexToPlay(int index) {
         mIndexToPlay.setValue(index);
-        setPlayingSong(index);
+//        setPlayingSong(index);
     }
 
     public static LiveData<Boolean> isSongLoaded() {

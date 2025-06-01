@@ -55,7 +55,7 @@
     <string name="action_cancel">Huỷ bỏ</string>
     <string name="action_update">Cập nhật</string>
     <string name="error_empty_playlist_name">Tên danh sách phát không được để trống</string>
-    <string name="error_playlist_already_exists">Tên danh phát này đã tồn tại. Vui lòng chọn một tên khác.</string>
+    <string name="error_playlist_already_exists">Tên danh sách phát này đã tồn tại. Vui lòng chọn một tên khác.</string>
     <string name="add_to_playlist_success">Bài hát đã được thêm vào danh sách phát \"%s\" thành công!</string>
     <string name="error_add_to_playlist">Bài hát này đã tồn tại trong danh sách phát bạn chọn.</string>
     <string name="title_playlist_detail">Chi tiết danh sách bạn chọn</string>

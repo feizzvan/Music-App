@@ -63,7 +63,5 @@ public class LibraryViewModel extends ViewModel {
             }
             throw new IllegalArgumentException("Unknown ViewModel class");
         }
-
-
     }
 }

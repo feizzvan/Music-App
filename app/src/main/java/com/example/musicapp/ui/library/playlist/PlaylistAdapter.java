@@ -14,84 +14,87 @@ import com.example.musicapp.databinding.ItemPlaylistBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
-    private final List<Playlist> playlists = new ArrayList<>();
-    private final OnPlaylistClickListener onPlaylistClickListener;
-    private final OnPlaylistOptionMenuClickListener onPlaylistOptionMenuClickListener;
+public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
+    private final List<Playlist> mPlaylists = new ArrayList<>();
+    private final OnPlaylistItemClickListener mItemClickListener;
+    private final OnPlaylistOptionMenuClickListener mMenuClickListener;
 
-    public PlaylistAdapter(OnPlaylistClickListener clickListener,
-                           OnPlaylistOptionMenuClickListener optionMenuClickListener) {
-        this.onPlaylistClickListener = clickListener;
-        this.onPlaylistOptionMenuClickListener = optionMenuClickListener;
+    public PlaylistAdapter(OnPlaylistItemClickListener itemClickListener,
+                           OnPlaylistOptionMenuClickListener menuClickListener) {
+        mItemClickListener = itemClickListener;
+        mMenuClickListener = menuClickListener;
     }
 
     @NonNull
     @Override
-    public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemPlaylistBinding binding = ItemPlaylistBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        return new PlaylistViewHolder(binding);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        ItemPlaylistBinding binding = ItemPlaylistBinding.inflate(layoutInflater, parent, false);
+        return new ViewHolder(binding, mItemClickListener, mMenuClickListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
-        Playlist playlist = playlists.get(position);
-        holder.bind(playlist);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(mPlaylists.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return playlists.size();
+        return mPlaylists.size();
     }
 
     public void updatePlaylists(List<Playlist> newPlaylists) {
         if (newPlaylists != null) {
-            int oldSize = playlists.size();
-            playlists.clear();
-            playlists.addAll(newPlaylists);
-            if (oldSize > playlists.size()) {
+            int oldSize = mPlaylists.size();
+            mPlaylists.clear();
+            mPlaylists.addAll(newPlaylists);
+            if (oldSize > mPlaylists.size()) {
                 notifyItemRangeRemoved(0, oldSize);
             }
-            notifyItemRangeChanged(0, playlists.size());
+            notifyItemRangeChanged(0, mPlaylists.size());
         }
     }
 
-    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        private final ItemPlaylistBinding binding;
-//        private final onPlaylistItemClickListener mItemClickListener;
-//        private final onPlaylistOptionMenuClickListener mOptionMenuClickListener;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final ItemPlaylistBinding mBinding;
+        private final OnPlaylistItemClickListener mItemClickListener;
+        private final OnPlaylistOptionMenuClickListener mMenuClickListener;
 
-        PlaylistViewHolder(ItemPlaylistBinding binding) {
+        public ViewHolder(@NonNull ItemPlaylistBinding binding,
+                          OnPlaylistItemClickListener itemClickListener,
+                          OnPlaylistOptionMenuClickListener menuClickListener) {
             super(binding.getRoot());
-            this.binding = binding;
-//            mItemClickListener = itemClickListener;
-//            mOptionMenuClickListener = optionMenuClickListener;
+            mBinding = binding;
+            mItemClickListener = itemClickListener;
+            mMenuClickListener = menuClickListener;
         }
 
         public void bind(Playlist playlist) {
-            binding.textItemPlaylistName.setText(playlist.getName());
-            binding.textItemPlaylistCount.setText(
-                    binding.getRoot().getContext().getString(
+            mBinding.textItemPlaylistName.setText(playlist.getName());
+            mBinding.textItemPlaylistCount.setText(
+                    mBinding.getRoot().getContext().getString(
                             R.string.text_songs,
                             playlist.getSongs() != null ? playlist.getSongs().size() : 0
                     )
             );
-            Glide.with(binding.getRoot().getContext())
+            Glide.with(mBinding.getRoot().getContext())
                     .load(playlist.getSongs() != null && !playlist.getSongs().isEmpty() ?
                             playlist.getSongs().get(0).getImageUrl() : R.drawable.ic_music_note)
                     .error(R.drawable.ic_music_note)
-                    .into(binding.imgItemPlaylistAvatar);
+                    .into(mBinding.imgItemPlaylistAvatar);
 
-            binding.getRoot().setOnClickListener(v -> onPlaylistClickListener.onPlaylistClick(playlist));
-            binding.btnItemPlaylistOption.setOnClickListener(v -> onPlaylistOptionMenuClickListener.onPlaylistOptionMenuClick(playlist));
+            mBinding.getRoot().setOnClickListener(v -> mItemClickListener.onClick(playlist));
+            mBinding.btnItemPlaylistOption
+                    .setOnClickListener(v -> mMenuClickListener.onClick(playlist));
         }
 
     }
 
-    public interface OnPlaylistClickListener {
-        void onPlaylistClick(Playlist playlist);
+    public interface OnPlaylistItemClickListener {
+        void onClick(Playlist playlist);
     }
 
     public interface OnPlaylistOptionMenuClickListener {
-        void onPlaylistOptionMenuClick(Playlist playlist);
+        void onClick(Playlist playlist);
     }
 }

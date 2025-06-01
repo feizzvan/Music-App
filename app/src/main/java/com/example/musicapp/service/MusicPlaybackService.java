@@ -65,11 +65,10 @@ public class MusicPlaybackService extends Service {
             }
         };
         mControllerFuture.addListener(listener, MoreExecutors.directExecutor());
-
     }
 
     public class LocalBinder extends Binder {
-        public MediaController getMediaSession() {
+        public MediaController getMediaController() {
             return mMediaController;
         }
 

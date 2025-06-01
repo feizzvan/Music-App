@@ -4,9 +4,9 @@ import com.example.musicapp.data.model.playlist.CreatePlaylist;
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.playlist.PlaylistById;
 import com.example.musicapp.data.model.playlist.PlaylistByUserId;
+import com.example.musicapp.data.model.playlist.PlaylistUpdateTitle;
 
 import io.reactivex.rxjava3.core.Single;
-import retrofit2.Callback;
 
 // Định nghĩa các nguồn dữ liệu cho Playlist
 public interface PlaylistDataSource {
@@ -14,12 +14,16 @@ public interface PlaylistDataSource {
     }
 
     interface Remote {
-        Single<PlaylistById> createPlaylist(CreatePlaylist createPlaylist);
+        Single<PlaylistById> createPlaylist(String token, CreatePlaylist createPlaylist);
 
-        void loadPlaylistByUserId(int userId, Callback<PlaylistByUserId> callback);
+        Single<PlaylistByUserId> loadPlaylistByUserId(String token, int userId);
 
-        void loadPlaylistById(int playlistId, Callback<PlaylistById> callback);
+        Single<PlaylistById> loadPlaylistById(String token, int playlistId);
 
-        Single<PlaylistById> updatePlayList(int playlistId, CreatePlaylist createPlaylist);
+        Single<PlaylistById> updatePlaylist(String token, int playlistId, CreatePlaylist createPlaylist);
+
+        Single<PlaylistById> deletePlaylist(String token, int playlistId);
+
+        Single<Playlist> updatePlaylistTitle(String token, int playlistId, PlaylistUpdateTitle playlistUpdateTitle);
     }
 }

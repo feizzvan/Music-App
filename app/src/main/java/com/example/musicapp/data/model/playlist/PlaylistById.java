@@ -3,7 +3,7 @@ package com.example.musicapp.data.model.playlist;
 import com.google.gson.annotations.SerializedName;
 
 public class PlaylistById {
-    @SerializedName("ata")
+    @SerializedName("data")
     private Playlist data;
 
     public Playlist getData() {

@@ -59,9 +59,10 @@ public class PlaylistFragment extends Fragment {
 
         setupView();
         setupViewModel();
+        loadPlaylist();
 
-        int userId = tokenManager.getUserId();
-        mPlaylistViewModel.loadPlaylistByUserId(userId);
+//        int userId = tokenManager.getUserId();
+//        mPlaylistViewModel.loadPlaylistByUserId(userId);
     }
 
     @Override
@@ -78,9 +79,8 @@ public class PlaylistFragment extends Fragment {
 
     private void setupView() {
         mAdapter = new PlaylistAdapter(
-                this::loadPlaylist,
+                this::navigateToPlaylistDetail,
                 playlist -> {
-                    mPlaylistViewModel.loadPlaylistById(playlist.getId());
                 }
         );
         mBinding.rvPlaylist.setAdapter(mAdapter);
@@ -96,27 +96,21 @@ public class PlaylistFragment extends Fragment {
         mPlaylistDetailViewModel = new ViewModelProvider(requireActivity()).get(PlaylistDetailViewModel.class);
 
         mPlaylistViewModel.getPlaylists().observe(getViewLifecycleOwner(), playlists -> {
-            int limit = Math.min(playlists.size(), 10);
-            List<Playlist> subList = playlists.subList(0, limit);
-            mAdapter.updatePlaylists(subList);
-            mMorePlaylistViewModel.setPlaylistLiveData(playlists);
+            if (playlists != null && !playlists.isEmpty()) {
+                int limit = Math.min(playlists.size(), 10);
+                List<Playlist> subList = playlists.subList(0, limit);
+                mAdapter.updatePlaylists(subList);
+                mMorePlaylistViewModel.setPlaylistLiveData(playlists);
+            }
         });
     }
 
-    private void loadPlaylist(Playlist playlist) {
+    private void loadPlaylist() {
         int userId = tokenManager.getUserId();
         mPlaylistViewModel.loadPlaylistByUserId(userId);
-        navigateToPlaylistDetail(playlist);
     }
 
-    private void navigateToPlaylistDetail(Playlist playlist) {
-        LibraryFragmentDirections.ActionLibraryFrToPlaylistDetailFr action =
-                LibraryFragmentDirections.actionLibraryFrToPlaylistDetailFr();
-        action.setId(playlist.getId());
-        action.setTitle(playlist.getName());
-        action.setUserId(playlist.getUserId());
-        NavHostFragment.findNavController(this).navigate(action);
-    }
+
 
     private void createPlaylist() {
         PlaylistCreationDialog.PlaylistDialogListener listener = playlistName ->
@@ -156,5 +150,19 @@ public class PlaylistFragment extends Fragment {
     private void navigateToMorePlaylist() {
         NavDirections directions = LibraryFragmentDirections.actionLibraryFrToMorePlaylistFr();
         NavHostFragment.findNavController(this).navigate(directions);
+    }
+
+    private void navigateToPlaylistDetail(Playlist playlist) {
+        if (playlist.getId() <= 0) {
+            Log.e("PlaylistFragment", "Invalid playlist ID: " + playlist.getId());
+            Toast.makeText(requireContext(), "Invalid playlist ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        LibraryFragmentDirections.ActionLibraryFrToPlaylistDetailFr action =
+                LibraryFragmentDirections.actionLibraryFrToPlaylistDetailFr();
+        action.setId(playlist.getId());
+        action.setTitle(playlist.getName());
+        action.setUserId(playlist.getUserId());
+        NavHostFragment.findNavController(this).navigate(action);
     }
 }

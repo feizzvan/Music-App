@@ -69,18 +69,6 @@ public interface AppService {
             @Body CreatePlaylist createPlaylist
     );
 
-    @PUT("/api/v1/playlists/update/{id}")
-    Call<PlaylistById> updatePlayList(
-            @Header("Authorization") String token,
-            @Path("id") int id, @Body CreatePlaylist createPlaylist
-    );
-
-    @HTTP(method = "DELETE", path = "/api/v1/playlists/delete/{id}", hasBody = true)
-    Call<PlaylistById> deletePlaylist(
-            @Header("Authorization") String token,
-            @Path("id") int id
-    );
-
     @GET("/api/v1/playlists/user/{userId}")
     Call<PlaylistByUserId> getPlaylistByUserId(
             @Header("Authorization") String token,
@@ -89,6 +77,19 @@ public interface AppService {
 
     @GET("/api/v1/playlists/get-by-id/{id}")
     Call<PlaylistById> getPlaylistById(
+            @Header("Authorization") String token,
+            @Path("id") int playlistId
+    );
+
+    @PUT("/api/v1/playlists/update/{id}")
+    Call<PlaylistById> updatePlaylist(
+            @Header("Authorization") String token,
+            @Path("id") int playlistId,
+            @Body CreatePlaylist createPlaylist
+    );
+
+    @HTTP(method = "DELETE", path = "/api/v1/playlists/delete/{id}", hasBody = true)
+    Call<PlaylistById> deletePlaylist(
             @Header("Authorization") String token,
             @Path("id") int id
     );

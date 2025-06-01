@@ -70,37 +70,30 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             try {
                 MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) iBinder;
                 binder.isMediaControllerInitialized().observe(NowPlayingActivity.this, isInitialized -> {
+                    Log.d(TAG, "onServiceConnected: " + isInitialized);
                     if (isInitialized) {
-                        mMediaController = binder.getMediaSession();
-                        if (mMediaController != null) {
-                            setupController();
-                            updateSeekBar();
-                            updateSeekBarMaxValue();
-                            updateDuration();
-                        } else {
-                            Toast.makeText(NowPlayingActivity.this, "MediaSession not available", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Log.w(TAG, "MediaController not initialized yet");
+                        mMediaController = binder.getMediaController();
+                        setupController();
+                        updateSeekBar();
+                        updateSeekBarMaxValue();
+                        updateDuration();
                     }
                 });
             } catch (Exception e) {
-                Log.e(TAG, "Service connection failed: " + e.getMessage(), e);
                 Toast.makeText(NowPlayingActivity.this, "Service connection failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mMediaController = null;
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityNowPlayingBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
+        mBinding = ActivityNowPlayingBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(mBinding.nowPlaying, (v, insets) -> {
@@ -152,11 +145,9 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         super.onDestroy();
         if (mMediaController != null) {
             mMediaController.removeListener(mPlayerListener);
-            mMediaController = null;
         }
-        if (mHandler != null) {
-            mHandler.removeCallbacks(mCallback);
-        }
+        mHandler.removeCallbacks(mCallback);
+        mMediaController = null;
         mPlayerListener = null;
         mDisposable.clear();
         Log.d(TAG, "Activity destroyed");
@@ -209,7 +200,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     private void setupAnimator() {
         mAnimator = AnimatorInflater.loadAnimator(this, R.animator.button_pressed);
         mRotationAnimator = ObjectAnimator.ofFloat(mBinding.imageNowPlayingArtwork, "rotation", 0f, 360f);
-        mRotationAnimator.setDuration(16000);
+        mRotationAnimator.setDuration(12000);
         mRotationAnimator.setRepeatMode(ValueAnimator.RESTART);
         mRotationAnimator.setRepeatCount(ValueAnimator.INFINITE);
         mRotationAnimator.setInterpolator(new LinearInterpolator());
@@ -229,7 +220,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         });
 
         mNowPlayingViewModel.isPlaying().observe(this, isPlaying -> {
-            if (isPlaying != null && isPlaying) {
+            if (isPlaying) {
                 if (mRotationAnimator.isPaused()) {
                     mRotationAnimator.resume();
                 } else if (!mRotationAnimator.isRunning()) {
@@ -238,9 +229,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                 mBinding.btnPlayPause.setImageResource(R.drawable.ic_pause);
             } else {
                 mBinding.btnPlayPause.setImageResource(R.drawable.ic_play);
-                if (mRotationAnimator.isRunning()) {
-                    mRotationAnimator.pause();
-                }
+                mRotationAnimator.pause();
             }
         });
 
@@ -269,7 +258,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 String currentTimeLabel = mNowPlayingViewModel.getTimeLabel(progress);
                 mBinding.textCurrentDuration.setText(currentTimeLabel);
-                if (fromUser && mMediaController != null) {
+                if (fromUser) {
                     mMediaController.seekTo(progress);
                 }
             }
@@ -287,6 +276,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     private void setupController() {
         registerMediaController();
         if (mMediaController != null) {
+            Log.d(TAG, "setupController: isPlaying " + mMediaController.isPlaying());
             if (!mMediaController.isPlaying()) {
                 mMediaController.prepare();
                 mMediaController.play();
@@ -302,6 +292,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             mPlayerListener = new Player.Listener() {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
+                    Log.d(TAG, "onIsPlayingChanged: " + isPlaying);
                     mNowPlayingViewModel.setIsPlaying(isPlaying);
                 }
 
@@ -316,9 +307,25 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
 
                 @Override
                 public void onPlaybackStateChanged(int playbackState) {
+                    Log.d(TAG, "onPlaybackStateChanged: "+ playbackState);
                     if (playbackState == Player.STATE_READY) {
                         updateSeekBarMaxValue();
                         updateDuration();
+                    }
+                    Log.d("PlayerDebug", "Playback state: " + playbackState);
+                    switch (playbackState) {
+                        case Player.STATE_BUFFERING:
+                            Log.d("PlayerDebug", "Buffering...");
+                            break;
+                        case Player.STATE_READY:
+                            Log.d("PlayerDebug", "Ready!");
+                            break;
+                        case Player.STATE_ENDED:
+                            Log.d("PlayerDebug", "Ended.");
+                            break;
+                        case Player.STATE_IDLE:
+                            Log.d("PlayerDebug", "Idle.");
+                            break;
                     }
                 }
             };
@@ -336,7 +343,6 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             boolean isFavorite = SharedDataUtils.isFavorite(song.getId());
             showFavoriteMode(isFavorite);
 
-//            String playlistName = SharedDataUtils.getCurrentPlaylistName();
             mBinding.textNowPlayingAlbum.setText(song.getGenreName());
             mBinding.textNowPlayingSongTitle.setText(song.getTitle());
             mBinding.textNowPlayingSongArtist.setText(song.getArtistName());
@@ -475,7 +481,10 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     private void updateSeekBarMaxValue() {
         if (mMediaController != null) {
             long duration = mMediaController.getDuration();
-            int seekBarMaxValue = duration <= Integer.MAX_VALUE ? (int) duration : 0;
+            int seekBarMaxValue = 0;
+            if (duration > 0 && duration <= Integer.MAX_VALUE) {
+                seekBarMaxValue = (int) duration;
+            }
             int progress = (int) mMediaController.getCurrentPosition();
             mBinding.seekBarNowPlaying.setProgress(progress);
             mBinding.seekBarNowPlaying.setMax(seekBarMaxValue);
