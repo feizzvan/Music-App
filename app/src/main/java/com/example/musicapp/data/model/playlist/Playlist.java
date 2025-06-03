@@ -15,8 +15,6 @@ import java.util.List;
 
 @Entity(tableName = "playlists")
 public class Playlist {
-    @Ignore
-
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "playlist_id")
     @SerializedName("id")

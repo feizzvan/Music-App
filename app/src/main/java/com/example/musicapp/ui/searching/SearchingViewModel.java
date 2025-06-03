@@ -24,16 +24,21 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 @HiltViewModel
 public class SearchingViewModel extends ViewModel {
-    private final SearchingRepository mSearchingRepository;
+    private final SearchingRepository.Local mLocalSearchingRepository;
+    private final SearchingRepository.Remote mRemoteSearchingRepository;
+
     private final MutableLiveData<List<Song>> mSongs = new MutableLiveData<>();
     private final MutableLiveData<String> mSelectedKey = new MutableLiveData<>();
 
     @Inject
-    public SearchingViewModel(SearchingRepository searchingRepository) {
-        mSearchingRepository = searchingRepository;
+    public SearchingViewModel(SearchingRepository.Local localSearchingRepository,
+                              SearchingRepository.Remote remoteSearchingRepository) {
+        mLocalSearchingRepository = localSearchingRepository;
+        mRemoteSearchingRepository = remoteSearchingRepository;
     }
 
     public LiveData<List<Song>> getSongs() {
@@ -44,8 +49,8 @@ public class SearchingViewModel extends ViewModel {
         mSongs.postValue(songs);
     }
 
-    public Flowable<List<Song>> search(String key) {
-        return mSearchingRepository.search(key);
+    public Single<List<Song>> search(String key) {
+        return mRemoteSearchingRepository.search(key);
     }
 
     // Cập nhật lại danh sách bài hát trong playlist đã tìm kiếm gần đây - tạo lịch sử tìm kiếm
@@ -54,7 +59,7 @@ public class SearchingViewModel extends ViewModel {
         Playlist playlist = SharedDataUtils.getPlaylist(playlistName);
         List<Song> songs = new ArrayList<>();
 
-        if (playlist != null && !playlist.getSongs().isEmpty()) {
+        if (playlist != null && playlist.getSongs() != null && !playlist.getSongs().isEmpty()) {
             songs.addAll(playlist.getSongs());
         }
 
@@ -74,22 +79,22 @@ public class SearchingViewModel extends ViewModel {
     public Completable insertKeys(String key) {
         List<HistorySearchedKey> keys = new ArrayList<>();
         keys.add(new HistorySearchedKey(0, key, new Date()));
-        return mSearchingRepository.insertKeys(keys);
+        return mLocalSearchingRepository.insertKeys(keys);
     }
 
     public Completable insertSongs(Song song) {
         List<HistorySearchedSong> songs = new ArrayList<>();
         HistorySearchedSong historySearchedSong = new HistorySearchedSong.Builder(song).build();
         songs.add(historySearchedSong);
-        return mSearchingRepository.insertSongs(songs);
+        return mLocalSearchingRepository.insertSongs(songs);
     }
 
     public Flowable<List<HistorySearchedKey>> getAllKeys() {
-        return mSearchingRepository.getAllKeys();
+        return mLocalSearchingRepository.getAllKeys();
     }
 
     public Flowable<List<Song>> getHistorySearchedSongs() {
-        return mSearchingRepository.getHistorySearchedSongs().map(ArrayList::new);
+        return mLocalSearchingRepository.getHistorySearchedSongs().map(ArrayList::new);
     }
 
     public LiveData<String> getSelectedKey() {
@@ -101,26 +106,29 @@ public class SearchingViewModel extends ViewModel {
     }
 
     public Completable clearAllKeys() {
-        return mSearchingRepository.clearAllKeys();
+        return mLocalSearchingRepository.clearAllKeys();
     }
 
     public Completable clearAllSongs() {
-        return mSearchingRepository.clearAllSongs();
+        return mLocalSearchingRepository.clearAllSongs();
     }
 
     public static class Factory implements ViewModelProvider.Factory {
-        private final SearchingRepository mSearchingRepository;
+        private final SearchingRepository.Local mLocalSearchingRepository;
+        private final SearchingRepository.Remote mRemoteSearchingRepository;
 
         @Inject
-        public Factory(SearchingRepository searchingRepository) {
-            mSearchingRepository = searchingRepository;
+        public Factory(SearchingRepository.Local localSearchingRepository,
+                       SearchingRepository.Remote remoteSearchingRepository) {
+            mLocalSearchingRepository = localSearchingRepository;
+            mRemoteSearchingRepository = remoteSearchingRepository;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             if (modelClass.isAssignableFrom(SearchingViewModel.class)) {
-                return (T) new SearchingViewModel(mSearchingRepository);
+                return (T) new SearchingViewModel(mLocalSearchingRepository, mRemoteSearchingRepository);
             } else {
                 throw new IllegalArgumentException("Unknown ViewModel class");
             }

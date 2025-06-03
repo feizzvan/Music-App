@@ -11,47 +11,51 @@ import javax.inject.Inject;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
-public class SearchingRepositoryImpl implements SearchingRepository {
-    private final SearchingDataSource mSearchingDataSource;
+public class SearchingRepositoryImpl implements SearchingRepository.Local, SearchingRepository.Remote {
+    private final SearchingDataSource.Local mLocalSearchingDataSource;
+    private final SearchingDataSource.Remote mRemoteSearchingDataSource;
 
     @Inject
-    public SearchingRepositoryImpl(SearchingDataSource searchingDataSource) {
-        mSearchingDataSource = searchingDataSource;
+    public SearchingRepositoryImpl(SearchingDataSource.Local localSearchingDataSource,
+                                   SearchingDataSource.Remote remoteSearchingDataSource) {
+        mLocalSearchingDataSource = localSearchingDataSource;
+        mRemoteSearchingDataSource = remoteSearchingDataSource;
     }
 
     @Override
     public Flowable<List<HistorySearchedKey>> getAllKeys() {
-        return mSearchingDataSource.getAllKeys();
+        return mLocalSearchingDataSource.getAllKeys();
     }
 
     @Override
     public Flowable<List<HistorySearchedSong>> getHistorySearchedSongs() {
-        return mSearchingDataSource.getHistorySearchedSongs();
-    }
-
-    @Override
-    public Flowable<List<Song>> search(String key) {
-        return mSearchingDataSource.search(key);
+        return mLocalSearchingDataSource.getHistorySearchedSongs();
     }
 
     @Override
     public Completable insertKeys(List<HistorySearchedKey> keys) {
-        return mSearchingDataSource.insertKeys(keys);
+        return mLocalSearchingDataSource.insertKeys(keys);
     }
 
     @Override
     public Completable insertSongs(List<HistorySearchedSong> songs) {
-        return mSearchingDataSource.insertSongs(songs);
+        return mLocalSearchingDataSource.insertSongs(songs);
     }
 
     @Override
     public Completable clearAllKeys() {
-        return mSearchingDataSource.clearAllKeys();
+        return mLocalSearchingDataSource.clearAllKeys();
     }
 
     @Override
     public Completable clearAllSongs() {
-        return mSearchingDataSource.clearAllSongs();
+        return mLocalSearchingDataSource.clearAllSongs();
+    }
+
+    @Override
+    public Single<List<Song>> search(String key) {
+        return mRemoteSearchingDataSource.search(key);
     }
 }

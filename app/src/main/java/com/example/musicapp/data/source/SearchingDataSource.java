@@ -8,19 +8,24 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 public interface SearchingDataSource {
-    Flowable<List<HistorySearchedKey>> getAllKeys();
+    interface Local {
+        Flowable<List<HistorySearchedKey>> getAllKeys();
 
-    Flowable<List<HistorySearchedSong>> getHistorySearchedSongs();
+        Flowable<List<HistorySearchedSong>> getHistorySearchedSongs();
 
-    Flowable<List<Song>> search(String key);
+        Completable insertKeys(List<HistorySearchedKey> keys);
 
-    Completable insertKeys(List<HistorySearchedKey> keys);
+        Completable insertSongs(List<HistorySearchedSong> songs);
 
-    Completable insertSongs(List<HistorySearchedSong> songs);
+        Completable clearAllKeys();
 
-    Completable clearAllKeys();
+        Completable clearAllSongs();
+    }
 
-    Completable clearAllSongs();
+    interface Remote {
+        Single<List<Song>> search(String key);
+    }
 }

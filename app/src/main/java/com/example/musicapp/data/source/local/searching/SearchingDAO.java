@@ -22,9 +22,6 @@ public interface SearchingDAO {
     @Query("SELECT * FROM history_searched_songs ORDER BY selected_at DESC limit 100")
     Flowable<List<HistorySearchedSong>> getHistorySearchedSongs();
 
-    @Query("SELECT * FROM songs WHERE title LIKE '%' || :key || '%' OR artist_id LIKE '%' || :key || '%'")
-    Flowable<List<Song>> search(String key);
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insertKeys(List<HistorySearchedKey> keys);
 

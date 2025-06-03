@@ -16,16 +16,14 @@ import retrofit2.Callback;
 public interface ArtistDataSource {
     interface Local {
 //        Flowable<List<Artist>> getAllArtists();
-
-//        Flowable<List<Artist>> getTopNArtists(int limit);
-
+//
 //        Single<ArtistWithSongs> getArtistWithSongs(int artistId);
 
-//        Completable insertArtist(List<Artist> artists);
+        Completable insertArtist(List<Artist> artists);
 
 //        Completable insertArtistSongCrossRef(List<ArtistSongCrossRef> artistSongCrossRefList);
 
-//        Completable updateArtist(Artist artist);
+        Completable updateArtist(Artist artist);
 
 //        Completable deleteArtist(Artist artist);
     }

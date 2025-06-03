@@ -18,7 +18,7 @@ public class MusicApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        AppConfig.init(this);
+        AppConfig.init();
         setupLanguage();
     }
 

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.example.musicapp.data.model.auth.AuthenticationResponse;
 import com.example.musicapp.data.model.auth.LogoutRequest;
-import com.example.musicapp.data.model.auth.ResetPassword;
+import com.example.musicapp.data.model.auth.UpdatePasswordRequest;
 import com.example.musicapp.data.source.AuthDataSource;
 
 import javax.inject.Inject;
@@ -20,10 +20,10 @@ public class RemoteAuthDataSourceImpl implements AuthDataSource {
     }
 
     @Override
-    public Single<AuthenticationResponse> resetPassword(ResetPassword resetPassword) {
+    public Single<AuthenticationResponse> updatePassword(String token, UpdatePasswordRequest updatePasswordRequest) {
         return Single.create(emitter -> {
             AppService appService = RetrofitHelper.getInstance();
-            Call<AuthenticationResponse> call = appService.resetPassword(resetPassword);
+            Call<AuthenticationResponse> call = appService.updatePassword(token, updatePasswordRequest);
 
             call.enqueue(new Callback<AuthenticationResponse>() {
                 @Override

@@ -13,4 +13,7 @@ import dagger.hilt.components.SingletonComponent;
 public abstract class PlaylistRepositoryModule {
     @Binds
     public abstract PlaylistRepository.Remote bindRemotePlaylistRepository(PlaylistRepositoryImpl playlistRepository);
+
+    @Binds
+    public abstract PlaylistRepository.Local bindLocalPlaylistRepository(PlaylistRepositoryImpl playlistRepository);
 }

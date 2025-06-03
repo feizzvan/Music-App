@@ -85,7 +85,6 @@ public class MostHeardFragment extends AppBaseFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(songs -> {
-                    Log.d("MostHeardFragment", "Loaded songs: " + songs.size());
                     mAdapter.updateSongs(songs);
                     mMostHeardViewModel.setSongs(songs);
                     SharedDataUtils.setupPlaylist(songs, MOST_HEARD.getValue());

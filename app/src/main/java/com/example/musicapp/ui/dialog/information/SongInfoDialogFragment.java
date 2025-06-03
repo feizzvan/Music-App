@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.databinding.FragmentSongInfoDialogBinding;
+import com.example.musicapp.utils.SharedDataUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 public class SongInfoDialogFragment extends BottomSheetDialogFragment {
@@ -57,21 +58,17 @@ public class SongInfoDialogFragment extends BottomSheetDialogFragment {
                 .setText(getString(R.string.text_song_info_title, song.getTitle()));
         mBinding.textSongInfoArtist
                 .setText(getString(R.string.text_song_info_artist, song.getArtistName()));
-//        mBinding.textSongInfoAlbum
-//                .setText(getString(R.string.text_song_info_album, song.getAlbum()));
         mBinding.textSongInfoDuration
                 .setText(getString(R.string.text_song_info_duration, song.getDuration()));
-//        mBinding.textSongInfoCounter
-//                .setText(getString(R.string.text_song_info_counter, song.getCounter()));
-//        mBinding.textSongInfoReplay
-//                .setText(getString(R.string.text_song_info_replay, song.getReplay()));
-//        mBinding.textSongInfoFavorite
-//                .setText(getString(R.string.text_song_info_favorite,
-//                        song.isFavorite()
-//                                ? getString(R.string.text_yes)
-//                                : getString(R.string.text_no)));
+        mBinding.textSongInfoCounter
+                .setText(getString(R.string.text_song_info_counter, song.getListenCount()));
+        mBinding.textSongInfoFavorite
+                .setText(getString(R.string.text_song_info_favorite,
+                        SharedDataUtils.isFavorite(song.getId())
+                                ? getString(R.string.text_yes)
+                                : getString(R.string.text_no)));
         mBinding.textSongInfoGenre
-                .setText(getString(R.string.text_song_info_genre, getString(R.string.text_na)));
+                .setText(getString(R.string.text_song_info_genre, song.getGenreName()));
         mBinding.textSongInfoPublishedYear
                 .setText(getString(R.string.text_song_info_published_year, getString(R.string.text_na)));
     }

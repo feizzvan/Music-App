@@ -77,6 +77,9 @@ public class ArtistFragment extends Fragment {
         mArtistViewModel.getArtist().observe(getViewLifecycleOwner(), artists -> {
             mArtistAdapter.updateArtist(artists);
             mMoreArtistViewModel.setArtists(artists);
+            mDisposable.add(mArtistViewModel.saveArtistToLocalDB(artists)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe());
         });
 
 //        mArtistViewModel.getArtist().observe(getViewLifecycleOwner(), artists ->
@@ -84,39 +87,7 @@ public class ArtistFragment extends Fragment {
 //                        .subscribeOn(Schedulers.io())
 //                        .subscribe()
 //                ));
-
-//        mDisposable.add(mArtistViewModel.loadLocalNArtists()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(artists -> mArtistViewModel.setLocalArtists(artists),
-//                        throwable -> mArtistViewModel.setLocalArtists(new ArrayList<>()))
-//        );
-
-//        mArtistViewModel.getLocalArtists()
-//                .observe(getViewLifecycleOwner(), mArtistAdapter::updateArtist);
-
-//        mDisposable.add(mArtistViewModel.loadAllLocalArtists()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(artists -> {
-//                    mMoreArtistViewModel.setArtists(artists);
-//                    mDisposable.add(mArtistViewModel.loadAllSongs()
-//                            .subscribeOn(Schedulers.io())
-//                            .observeOn(AndroidSchedulers.mainThread())
-//                            .subscribe(songs -> saveArtistSongCrossRef(artists, songs),
-//                                    throwable -> {
-//                                    })
-//                    );
-//                }, throwable -> mMoreArtistViewModel.setArtists(new ArrayList<>()))
-//        );
     }
-
-//    private void saveArtistSongCrossRef(List<Artist> artists, List<Song> songs) {
-//        mDisposable.add(mArtistViewModel.saveArtistSongCrossRef(artists, songs)
-//                .subscribeOn(Schedulers.io())
-//                .subscribe()
-//        );
-//    }
 
     private void navigateToDetailArtist(Artist artist) {
         DiscoveryFragmentDirections.ActionDiscoveryFrToDetailArtistFr action =

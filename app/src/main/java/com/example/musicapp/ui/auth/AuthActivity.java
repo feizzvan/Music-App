@@ -1,5 +1,6 @@
 package com.example.musicapp.ui.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -8,14 +9,21 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.musicapp.MainActivity;
 import com.example.musicapp.R;
 import com.example.musicapp.databinding.ActivityAuthBinding;
+import com.example.musicapp.utils.TokenManager;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class AuthActivity extends AppCompatActivity {
     private ActivityAuthBinding mBinding;
+
+    @Inject
+    public TokenManager tokenManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

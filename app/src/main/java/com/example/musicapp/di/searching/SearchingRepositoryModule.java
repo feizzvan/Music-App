@@ -12,5 +12,8 @@ import dagger.hilt.components.SingletonComponent;
 @InstallIn(SingletonComponent.class)
 public abstract class SearchingRepositoryModule {
     @Binds
-    public abstract SearchingRepository bindSearchingRepository(SearchingRepositoryImpl repository);
+    public abstract SearchingRepository.Local bindLocalSearchingRepository(SearchingRepositoryImpl repository);
+
+    @Binds
+    public abstract SearchingRepository.Remote bindRemoteSearchingRepository(SearchingRepositoryImpl repository);
 }

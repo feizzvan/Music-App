@@ -111,7 +111,6 @@ public class Song {
         this.mArtistName = artistName;
     }
 
-
     public String getFileUrl() {
         return mFileUrl;
     }

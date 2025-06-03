@@ -23,6 +23,7 @@ import com.example.musicapp.data.model.playlist.PlaylistById;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.ui.library.playlist.PlaylistAdapter;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
+import com.example.musicapp.utils.TokenManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -43,6 +44,9 @@ public class AddToPlaylistDialog extends DialogFragment {
     private PlaylistViewModel mPlaylistViewModel;
     private final Song mSong;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
+
+    @Inject
+    public TokenManager tokenManager;
 
     @Inject
     public PlaylistViewModel.Factory factory;
@@ -130,7 +134,6 @@ public class AddToPlaylistDialog extends DialogFragment {
                     }
                 },
                 playlist -> {
-
                 }
         );
 
@@ -156,6 +159,7 @@ public class AddToPlaylistDialog extends DialogFragment {
         if (playlistById == null) {
             mDisposable.add(mPlaylistViewModel.createPlaylist(playlistName)
                     .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe()
             );
         } else {

@@ -46,16 +46,6 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
     <TextView
-        android:id="@+id/text_song_info_album"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_24dp"
-        android:layout_marginTop="@dimen/margin_8dp"
-        android:layout_marginEnd="@dimen/margin_24dp"
-        android:text="@string/text_song_info_album"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-    <TextView
         android:id="@+id/text_song_info_duration"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -73,16 +63,6 @@
         android:layout_marginTop="@dimen/margin_8dp"
         android:layout_marginEnd="@dimen/margin_24dp"
         android:text="@string/text_song_info_counter"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-    <TextView
-        android:id="@+id/text_song_info_replay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_24dp"
-        android:layout_marginTop="@dimen/margin_8dp"
-        android:layout_marginEnd="@dimen/margin_24dp"
-        android:text="@string/text_song_info_replay"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
     <TextView

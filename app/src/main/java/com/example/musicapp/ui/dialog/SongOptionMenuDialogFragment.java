@@ -22,6 +22,7 @@ import com.example.musicapp.ui.dialog.optionmenu.OptionMenuViewModel;
 import com.example.musicapp.ui.dialog.playlist.AddToPlaylistDialog;
 import com.example.musicapp.ui.library.favorite.FavoriteViewModel;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
+import com.example.musicapp.utils.AuthPromptUtils;
 import com.example.musicapp.utils.SharedDataUtils;
 import com.example.musicapp.utils.TokenManager;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -113,6 +114,10 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
     }
 
     private void showSongInfo(Song song) {
+        if (song == null) {
+            return;
+        }
+
         mBinding.includeSongMenuOption.textItemMenuOptionTitle.setText(song.getTitle());
         mBinding.includeSongMenuOption.textItemSongArtist.setText(song.getArtistName());
         Glide.with(this)
@@ -122,6 +127,10 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
     }
 
     private void showAddToPlaylistDialog() {
+        if (tokenManager.getToken() == null) {
+            AuthPromptUtils.showLoginRequiredDialog(requireContext());
+            return;
+        }
         Song song = mOptionMenuViewModel.getSong().getValue();
         if (song == null) {
             Toast.makeText(requireContext(), "No song selected", Toast.LENGTH_SHORT).show();
@@ -146,9 +155,12 @@ public class SongOptionMenuDialogFragment extends BottomSheetDialogFragment {
     }
 
     private void handleAddToFavorite() {
+        if (tokenManager.getToken() == null) {
+            AuthPromptUtils.showLoginRequiredDialog(requireContext());
+            return;
+        }
         Song song = mOptionMenuViewModel.getSong().getValue();
         if (song == null) {
-//            Toast.makeText(requireContext(), "No song selected", Toast.LENGTH_SHORT).show();
             return;
         }
 

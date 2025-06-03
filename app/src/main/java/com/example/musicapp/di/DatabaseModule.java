@@ -7,6 +7,7 @@ import androidx.room.Room;
 import com.example.musicapp.data.source.local.AlbumDAO;
 import com.example.musicapp.data.source.local.AppDatabase;
 import com.example.musicapp.data.source.local.artist.ArtistDAO;
+import com.example.musicapp.data.source.local.playlist.PlaylistDAO;
 import com.example.musicapp.data.source.local.recent.RecentSongDAO;
 import com.example.musicapp.data.source.local.searching.SearchingDAO;
 import com.example.musicapp.data.source.local.song.SongDAO;
@@ -36,10 +37,10 @@ public class DatabaseModule {
         return appDatabase.songDAO();
     }
 
-//    @Provides
-//    public PlaylistDAO providePlaylistDAO(AppDatabase appDatabase) {
-//        return appDatabase.playlistDAO();
-//    }
+    @Provides
+    public PlaylistDAO providePlaylistDAO(AppDatabase appDatabase) {
+        return appDatabase.playlistDAO();
+    }
 
     @Provides
     public ArtistDAO provideArtistDAO(AppDatabase appDatabase) {

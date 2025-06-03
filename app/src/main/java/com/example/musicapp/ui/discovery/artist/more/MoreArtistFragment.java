@@ -56,6 +56,8 @@ public class MoreArtistFragment extends Fragment {
         MoreArtistFragmentDirections.ActionMoreArtistFrToDetailArtistFr action
                 = MoreArtistFragmentDirections.actionMoreArtistFrToDetailArtistFr();
         action.setArtistId(artist.getId());
+        action.setArtistName(artist.getName());
+        action.setArtistAvatar(artist.getAvatar());
         NavHostFragment.findNavController(this).navigate(action);
     }
 }

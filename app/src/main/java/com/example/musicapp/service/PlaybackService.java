@@ -76,6 +76,7 @@ public class PlaybackService extends MediaSessionService {
         mMediaSession.getPlayer().release(); // Giải phóng tài nguyên của ExoPlayer
         mMediaSession.release(); // Giải phóng tài nguyên của MediaSession
         mMediaSession = null;
+
         mDisposable.dispose();
         super.onDestroy();
     }

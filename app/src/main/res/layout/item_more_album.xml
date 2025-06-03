@@ -23,7 +23,7 @@
 
         <ImageView
             android:id="@+id/img_item_album_detail"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="@string/imgDescription"
             android:scaleType="centerCrop"
@@ -32,13 +32,15 @@
 
     <TextView
         android:id="@+id/text_item_album"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_4dp"
+        android:layout_marginEnd="@dimen/margin_4dp"
         android:layout_marginBottom="@dimen/margin_4dp"
+        android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/cardView3"
-        app:layout_constraintStart_toStartOf="@+id/cardView3"
-        app:layout_constraintTop_toBottomOf="@+id/cardView3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:text="Title Album" />
 </androidx.constraintlayout.widget.ConstraintLayout>

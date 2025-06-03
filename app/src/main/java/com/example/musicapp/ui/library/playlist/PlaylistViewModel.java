@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.musicapp.data.model.playlist.CreatePlaylist;
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.playlist.PlaylistById;
+import com.example.musicapp.data.model.playlist.PlaylistUpdateTitle;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.playlist.PlaylistRepositoryImpl;
 import com.example.musicapp.utils.TokenManager;
@@ -132,6 +133,50 @@ public class PlaylistViewModel extends ViewModel {
                             .ignoreElement();
                 })
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public void deletePlaylist(int playlistId) {
+        // Xóa khỏi LiveData ngay
+        List<Playlist> current = mPlaylists.getValue();
+        if (current != null) {
+            List<Playlist> updated = new ArrayList<>(current);
+            for (int i = 0; i < updated.size(); i++) {
+                if (updated.get(i).getId() == playlistId) {
+                    updated.remove(i);
+                    break;
+                }
+            }
+            mPlaylists.postValue(updated);
+        }
+
+        String token = "Bearer " + tokenManager.getToken();
+        mDisposable.add(mPlaylistRepository.deletePlaylist(token, playlistId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> {
+                            Log.d("PlaylistViewModel", "Playlist deleted: " + playlistId);
+                            loadPlaylistByUserId(tokenManager.getUserId());
+                        },
+                        throwable -> Log.e("PlaylistViewModel", "Failed to delete playlist: " + throwable.getMessage())
+                )
+        );
+    }
+
+    public void renamePlaylist(int playlistId, String newTitle) {
+        String token = "Bearer " + tokenManager.getToken();
+        PlaylistUpdateTitle updateTitle = new PlaylistUpdateTitle(newTitle);
+        mDisposable.add(mPlaylistRepository.updatePlaylistTitle(token, playlistId, updateTitle)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        updatedPlaylist -> {
+                            Log.d("PlaylistViewModel", "Playlist renamed: " + playlistId + " -> " + newTitle);
+                            loadPlaylistByUserId(tokenManager.getUserId());
+                        },
+                        throwable -> Log.e("PlaylistViewModel", "Failed to rename playlist: " + throwable.getMessage())
+                )
+        );
     }
 
     public static class Factory implements ViewModelProvider.Factory {

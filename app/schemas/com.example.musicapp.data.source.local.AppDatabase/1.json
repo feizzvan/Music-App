@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "fb6ece511ef4ee41f973674a45e96dab",
+    "identityHash": "360c1457ce06104762365bd4de9683c5",
     "entities": [
       {
         "tableName": "album",
@@ -29,6 +29,40 @@
           "autoGenerate": false,
           "columnNames": [
             "album_id"
+          ]
+        }
+      },
+      {
+        "tableName": "playlists",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`playlist_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `user_id` INTEGER NOT NULL, `created_at` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "mId",
+            "columnName": "playlist_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mName",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mCreatedAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "playlist_id"
           ]
         }
       },
@@ -369,7 +403,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fb6ece511ef4ee41f973674a45e96dab')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '360c1457ce06104762365bd4de9683c5')"
     ]
   }
 }

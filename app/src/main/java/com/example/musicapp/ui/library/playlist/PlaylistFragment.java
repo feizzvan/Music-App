@@ -1,7 +1,6 @@
 package com.example.musicapp.ui.library.playlist;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,17 +8,19 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.musicapp.R;
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.databinding.FragmentPlaylistBinding;
+import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.dialog.playlist.PlaylistCreationDialog;
 import com.example.musicapp.ui.library.LibraryFragmentDirections;
 import com.example.musicapp.ui.library.playlist.detail.PlaylistDetailViewModel;
 import com.example.musicapp.ui.library.playlist.more.MorePlaylistViewModel;
+import com.example.musicapp.utils.AuthPromptUtils;
 import com.example.musicapp.utils.TokenManager;
 
 import java.util.List;
@@ -32,7 +33,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @AndroidEntryPoint
-public class PlaylistFragment extends Fragment {
+public class PlaylistFragment extends AppBaseFragment {
     private FragmentPlaylistBinding mBinding;
     private PlaylistAdapter mAdapter;
     private PlaylistViewModel mPlaylistViewModel;
@@ -60,9 +61,6 @@ public class PlaylistFragment extends Fragment {
         setupView();
         setupViewModel();
         loadPlaylist();
-
-//        int userId = tokenManager.getUserId();
-//        mPlaylistViewModel.loadPlaylistByUserId(userId);
     }
 
     @Override
@@ -80,8 +78,7 @@ public class PlaylistFragment extends Fragment {
     private void setupView() {
         mAdapter = new PlaylistAdapter(
                 this::navigateToPlaylistDetail,
-                playlist -> {
-                }
+                this::showPlaylistOptionMenu
         );
         mBinding.rvPlaylist.setAdapter(mAdapter);
         mBinding.includeBtnAddPlaylist.btnAddPlaylist.setOnClickListener(view -> createPlaylist());
@@ -110,42 +107,30 @@ public class PlaylistFragment extends Fragment {
         mPlaylistViewModel.loadPlaylistByUserId(userId);
     }
 
-
-
     private void createPlaylist() {
+        if (tokenManager.getToken() == null) {
+            AuthPromptUtils.showLoginRequiredDialog(requireContext());
+            return;
+        }
+
         PlaylistCreationDialog.PlaylistDialogListener listener = playlistName ->
                 mDisposable.add(mPlaylistViewModel.createPlaylist(playlistName)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(createdPlaylist -> {
-                            Log.d("PlaylistFragment", "Playlist created: " + createdPlaylist.getData().getName());
-                            Toast.makeText(requireContext(), "Playlist created: " + createdPlaylist.getData().getName(), Toast.LENGTH_SHORT).show();
+                            if (createdPlaylist != null && createdPlaylist.getData() != null) {
+                                Toast.makeText(requireContext(), getString(R.string.playlist_created) + createdPlaylist.getData().getName(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(requireContext(), R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
+                            }
                             mPlaylistViewModel.loadPlaylistByUserId(tokenManager.getUserId());
                         }, throwable -> {
-                            Log.e("PlaylistFragment", "Error creating playlist: " + throwable.getMessage());
-                            Toast.makeText(requireContext(), "Error creating playlist: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         })
                 );
 
         PlaylistCreationDialog dialog = new PlaylistCreationDialog(listener);
         dialog.show(requireActivity().getSupportFragmentManager(), PlaylistCreationDialog.TAG);
     }
-
-//    private void checkAndCreatePlaylist(Playlist playlist, String playlistName) {
-//        if (playlist == null) {
-//            mDisposable.add(mPlaylistViewModel.createPlaylist(playlistName)
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe(createdPlaylist -> {
-//                        Toast.makeText(requireContext(), "Playlist created: " + createdPlaylist.getName(), Toast.LENGTH_SHORT).show();
-//                    }, throwable -> {
-//                        Toast.makeText(requireContext(), "Error creating playlist: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-//                    })
-//            );
-//        } else {
-//            String errorMessage = getString(R.string.error_playlist_already_exists);
-//            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
-//        }
-//    }
 
     private void navigateToMorePlaylist() {
         NavDirections directions = LibraryFragmentDirections.actionLibraryFrToMorePlaylistFr();
@@ -154,10 +139,10 @@ public class PlaylistFragment extends Fragment {
 
     private void navigateToPlaylistDetail(Playlist playlist) {
         if (playlist.getId() <= 0) {
-            Log.e("PlaylistFragment", "Invalid playlist ID: " + playlist.getId());
             Toast.makeText(requireContext(), "Invalid playlist ID", Toast.LENGTH_SHORT).show();
             return;
         }
+
         LibraryFragmentDirections.ActionLibraryFrToPlaylistDetailFr action =
                 LibraryFragmentDirections.actionLibraryFrToPlaylistDetailFr();
         action.setId(playlist.getId());

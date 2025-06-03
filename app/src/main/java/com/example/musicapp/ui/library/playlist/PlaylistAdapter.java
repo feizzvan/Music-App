@@ -52,6 +52,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
                 notifyItemRangeRemoved(0, oldSize);
             }
             notifyItemRangeChanged(0, mPlaylists.size());
+//            notifyDataSetChanged();
         }
     }
 

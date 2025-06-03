@@ -17,23 +17,22 @@ import io.reactivex.rxjava3.core.Flowable;
 
 @HiltViewModel
 public class MainViewModel extends ViewModel {
-    private final SearchingRepository mSearchingRepository;
+    private final SearchingRepository.Local mSearchingRepository;
 
     @Inject
-    public MainViewModel(SearchingRepository searchingRepository) {
+    public MainViewModel(SearchingRepository.Local searchingRepository) {
         mSearchingRepository = searchingRepository;
     }
 
     public Flowable<List<Song>> loadHistorySearchedSongs() {
         return mSearchingRepository.getHistorySearchedSongs().map(ArrayList::new);
-
     }
 
     public static class Factory implements ViewModelProvider.Factory {
-        private final SearchingRepository mSearchingRepository;
+        private final SearchingRepository.Local mSearchingRepository;
 
         @Inject
-        public Factory(SearchingRepository searchingRepository) {
+        public Factory(SearchingRepository.Local searchingRepository) {
             mSearchingRepository = searchingRepository;
         }
 

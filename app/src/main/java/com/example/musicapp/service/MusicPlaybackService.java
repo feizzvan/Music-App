@@ -46,7 +46,6 @@ public class MusicPlaybackService extends Service {
         return mBinder;
     }
 
-
     private void setupMediaSession() {
         SessionToken sessionToken = new SessionToken(getApplicationContext(),
                 new ComponentName(getApplicationContext(), PlaybackService.class));
@@ -76,5 +75,4 @@ public class MusicPlaybackService extends Service {
             return mIsMediaControllerInitialized;
         }
     }
-
 }

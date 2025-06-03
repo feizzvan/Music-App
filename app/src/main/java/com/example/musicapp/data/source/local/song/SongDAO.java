@@ -22,7 +22,7 @@ public interface SongDAO {
     Single<List<Song>> getAllSongs();
 
     @Query("SELECT * FROM songs WHERE song_id = :songId")
-    Flowable<Song> getSongById(int songId); // Dùng cho tập dữ liệu có thể phát sinh hoặc thay đổi theo thời gian
+    Flowable<Song> getSongById(int songId);
 
 //    @Query("SELECT * FROM songs WHERE artist LIKE :key")
 //    List<Song> getSongsByArtistName(String key);

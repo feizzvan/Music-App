@@ -37,6 +37,7 @@ import com.example.musicapp.service.MusicPlaybackService;
 import com.example.musicapp.ui.dialog.SongOptionMenuDialogFragment;
 import com.example.musicapp.ui.dialog.optionmenu.OptionMenuViewModel;
 import com.example.musicapp.utils.AppUtils;
+import com.example.musicapp.utils.AuthPromptUtils;
 import com.example.musicapp.utils.SharedDataUtils;
 import com.example.musicapp.utils.TokenManager;
 
@@ -143,10 +144,14 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mMediaController != null) {
+        if (mMediaController != null && mPlayerListener != null) {
             mMediaController.removeListener(mPlayerListener);
         }
-        mHandler.removeCallbacks(mCallback);
+
+        if (mHandler != null && mCallback != null) {
+            mHandler.removeCallbacks(mCallback);
+        }
+
         mMediaController = null;
         mPlayerListener = null;
         mDisposable.clear();
@@ -276,7 +281,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     private void setupController() {
         registerMediaController();
         if (mMediaController != null) {
-            Log.d(TAG, "setupController: isPlaying " + mMediaController.isPlaying());
+            Log.d("VANVAN", "setupController: isPlaying " + mMediaController.isPlaying());
             if (!mMediaController.isPlaying()) {
                 mMediaController.prepare();
                 mMediaController.play();
@@ -292,7 +297,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
             mPlayerListener = new Player.Listener() {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
-                    Log.d(TAG, "onIsPlayingChanged: " + isPlaying);
+                    Log.d("VANVAN", "onIsPlayingChanged: " + isPlaying);
                     mNowPlayingViewModel.setIsPlaying(isPlaying);
                 }
 
@@ -312,7 +317,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                         updateSeekBarMaxValue();
                         updateDuration();
                     }
-                    Log.d("PlayerDebug", "Playback state: " + playbackState);
+                    Log.d("VANVAN", "Playback state: " + playbackState);
                     switch (playbackState) {
                         case Player.STATE_BUFFERING:
                             Log.d("PlayerDebug", "Buffering...");
@@ -435,6 +440,11 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void setupActionFavorite() {
+        if(tokenManager.getToken() == null){
+            AuthPromptUtils.showLoginRequiredDialog(this);
+            return;
+        }
+
         PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
         Song song = null;
 

@@ -12,11 +12,13 @@ import javax.inject.Inject;
 import io.reactivex.rxjava3.core.Single;
 
 public class PlaylistRepositoryImpl implements PlaylistRepository.Local, PlaylistRepository.Remote {
-    //    private final PlaylistDataSource.Local mLocalDataSource;
+    private final PlaylistDataSource.Local mLocalDataSource;
     private final PlaylistDataSource.Remote mRemoteDataSource;
 
     @Inject
-    public PlaylistRepositoryImpl(PlaylistDataSource.Remote remoteDataSource) {
+    public PlaylistRepositoryImpl(PlaylistDataSource.Local localDataSource,
+                                  PlaylistDataSource.Remote remoteDataSource) {
+        mLocalDataSource = localDataSource;
         mRemoteDataSource = remoteDataSource;
     }
 

@@ -12,5 +12,8 @@ import dagger.hilt.components.SingletonComponent;
 @InstallIn(SingletonComponent.class)
 public abstract class ArtistRepositoryModule {
     @Binds
-    public abstract ArtistRepository bindArtistRepository(ArtistRepositoryImpl artistRepository);
+    public abstract ArtistRepository.Remote bindRemoteArtistRepository(ArtistRepositoryImpl artistRepository);
+
+    @Binds
+    public abstract ArtistRepository.Local bindLocalArtistRepository(ArtistRepositoryImpl artistRepository);
 }

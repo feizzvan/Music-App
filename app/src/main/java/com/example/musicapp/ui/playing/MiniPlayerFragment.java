@@ -24,7 +24,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
@@ -38,7 +37,9 @@ import com.example.musicapp.data.repository.favorite.FavoriteRepository;
 import com.example.musicapp.data.repository.song.SongRepository;
 import com.example.musicapp.databinding.FragmentMiniPlayerBinding;
 import com.example.musicapp.service.MusicPlaybackService;
+import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.utils.AppUtils;
+import com.example.musicapp.utils.AuthPromptUtils;
 import com.example.musicapp.utils.SharedDataUtils;
 import com.example.musicapp.utils.TokenManager;
 
@@ -48,16 +49,14 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @AndroidEntryPoint
-public class MiniPlayerFragment extends Fragment implements View.OnClickListener {
+public class MiniPlayerFragment extends AppBaseFragment implements View.OnClickListener {
     private FragmentMiniPlayerBinding mBinding;
     private MiniPlayerViewModel mMiniPlayerViewModel;
     private MediaController mMediaController;
     private Player.Listener mPlayerListener;
     private Animator mAnimator;
     private ObjectAnimator mRotationAnimator;
-
     private final CompositeDisposable mDisposable = new CompositeDisposable();
-//    private float currentFraction = 0f;
 
     @Inject
     SongRepository.Local localSongRepository;
@@ -75,9 +74,6 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                     if (data != null) {
                         float currentFraction = data.getFloatExtra(AppUtils.EXTRA_CURRENT_FRACTION, 0f);
                         mRotationAnimator.setCurrentFraction(currentFraction);
-//                        currentFraction = fraction;
-                    } else {
-//                        currentFraction = 0f;
                     }
                 }
             }
@@ -119,7 +115,6 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
 
         setupAnimator();
         setupListener();
-//        setupViewModel();
     }
 
     @Override
@@ -226,10 +221,12 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void setupPlayPauseAction() {
-        if (mMediaController.isPlaying()) {
-            mMediaController.pause();
-        } else {
-            mMediaController.play();
+        if (mMediaController != null) {
+            if (mMediaController.isPlaying()) {
+                mMediaController.pause();
+            } else {
+                mMediaController.play();
+            }
         }
     }
 
@@ -241,6 +238,11 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
     }
 
     private void setupFavorite() {
+        if (tokenManager.getToken() == null) {
+            AuthPromptUtils.showLoginRequiredDialog(requireContext());
+            return;
+        }
+
         PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
         if (playingSong != null) {
             Song song = playingSong.getSong();
@@ -296,7 +298,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                     .error(R.drawable.ic_music_note)
                     .into(mBinding.imgMiniPlayerAvatar);
             mBinding.textMiniPlayerTitle.setText(song.getTitle());
-            mBinding.textMiniPlayerArtist.setText(song.getArtistId() != 0 ? String.valueOf(song.getArtistId()) : "Unknown");
+            mBinding.textMiniPlayerArtist.setText(song.getArtistName());
             boolean isFavorite = SharedDataUtils.isFavorite(song.getId());
             updateFavoriteStatus(isFavorite);
         }
@@ -333,6 +335,7 @@ public class MiniPlayerFragment extends Fragment implements View.OnClickListener
                 Boolean condition3 = playlist != null
                         && playlist.getName().compareTo(SEARCHED.getValue()) == 0;
                 if (condition1 || condition2 || condition3) {
+                    Log.d("VANVAN", "setupObserveControllerData: ");
                     mMediaController.seekTo(index, 0);
                     mMediaController.prepare();
 //                    mMediaController.play();

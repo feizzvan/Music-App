@@ -2,7 +2,6 @@ package com.example.musicapp.data.source.local.searching;
 
 import com.example.musicapp.data.model.history.HistorySearchedKey;
 import com.example.musicapp.data.model.history.HistorySearchedSong;
-import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.source.SearchingDataSource;
 
 import java.util.List;
@@ -12,7 +11,7 @@ import javax.inject.Inject;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 
-public class LocalSearchingDataSource implements SearchingDataSource {
+public class LocalSearchingDataSource implements SearchingDataSource.Local {
     private final SearchingDAO mSearchingDAO;
 
     @Inject
@@ -28,11 +27,6 @@ public class LocalSearchingDataSource implements SearchingDataSource {
     @Override
     public Flowable<List<HistorySearchedSong>> getHistorySearchedSongs() {
         return mSearchingDAO.getHistorySearchedSongs();
-    }
-
-    @Override
-    public Flowable<List<Song>> search(String key) {
-        return mSearchingDAO.search(key);
     }
 
     @Override

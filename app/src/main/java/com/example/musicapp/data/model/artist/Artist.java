@@ -2,6 +2,7 @@ package com.example.musicapp.data.model.artist;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
@@ -41,6 +42,7 @@ public class Artist {
 
     }
 
+    @Ignore
     public Artist(int mId, String mName, String mAvatar, long mListenerCount, int mSongCount, String mCreatedAt) {
         this.mId = mId;
         this.mName = mName;

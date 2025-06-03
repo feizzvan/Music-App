@@ -13,9 +13,9 @@ import com.example.musicapp.R;
 public class ConfirmationDialogFragment extends DialogFragment {
     public static final String TAG = "ConfirmationDialogFragment";
     private final int mMessageId;
-    private final onDeleteConfirmListener mListener;
+    private final OnDeleteConfirmListener mListener;
 
-    public ConfirmationDialogFragment(int messageId, onDeleteConfirmListener listener) {
+    public ConfirmationDialogFragment(int messageId, OnDeleteConfirmListener listener) {
         mMessageId = messageId;
         mListener = listener;
     }
@@ -35,7 +35,7 @@ public class ConfirmationDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    public interface onDeleteConfirmListener {
+    public interface OnDeleteConfirmListener {
         void onConfirm(boolean isConfirmed);
     }
 }

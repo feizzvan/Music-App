@@ -127,4 +127,23 @@
     <string name="playlist_searched">Đã tìm</string>
     <string name="playlist_most_heard">Nghe nhiều</string>
     <string name="playlist_custom">Tuỳ chỉnh</string>
+    <string name="text_title_login_required">Yêu cầu đăng nhập</string>
+    <string name="text_login_required">Bạn cần đăng nhập để sử dụng chức năng này. Bạn có muốn đăng nhập ngay?</string>
+    <string name="action_delete_playlist">Xóa Playlist</string>
+    <string name="action_rename_playlist">Đổi tên Playlist</string>
+    <string name="title_confirm_delete">Xác nhận xóa</string>
+    <string name="text_are_you_sure_delete_playlist">Bạn có chắc chắn muốn xóa playlist này?</string>
+    <string name="action_delete">Xóa</string>
+    <string name="text_delete_playlist_success">Đã xóa playlist</string>
+    <string name="title_rename_playlist">Đổi tên Playlist</string>
+    <string name="action_save">Lưu</string>
+    <string name="text_rename_playlist_success">Đã đổi tên playlist</string>
+    <string name="text_name_invalid">Tên không hợp lệ</string>
+    <string name="playlist_created">"Playlist đã được tạo: "</string>
+    <string name="playlist_already_exists">Playlist đã tồn tại</string>
+    <string name="old_password">Mật khẩu cũ</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="confirm_password">Xác nhận mật khẩu mới</string>
+    <string name="change_password_successfully">Đổi mật khẩu thành công</string>
+    <string name="change_password_failed">Đổi mật khẩu thất bại</string>
 </resources>

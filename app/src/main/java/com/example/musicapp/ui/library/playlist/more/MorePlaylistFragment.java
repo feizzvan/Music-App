@@ -7,12 +7,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.databinding.FragmentMorePlaylistBinding;
+import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.library.playlist.PlaylistAdapter;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
 
@@ -22,9 +22,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @AndroidEntryPoint
-public class MorePlaylistFragment extends Fragment {
+public class MorePlaylistFragment extends AppBaseFragment {
     private FragmentMorePlaylistBinding mBinding;
     private PlaylistAdapter mAdapter;
+    private PlaylistViewModel mPlaylistViewModel;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Inject
@@ -56,16 +57,14 @@ public class MorePlaylistFragment extends Fragment {
                 requireActivity().getOnBackPressedDispatcher().onBackPressed());
         mAdapter = new PlaylistAdapter(
                 this::navigateToPlaylistDetail,
-                playlist -> {
-
-                });
+                this::showPlaylistOptionMenu);
         mBinding.rvMorePlaylist.setAdapter(mAdapter);
     }
 
     private void setupViewModel() {
-        MorePlaylistViewModel morePlaylistViewModel =
-                new ViewModelProvider(requireActivity()).get(MorePlaylistViewModel.class);
-        morePlaylistViewModel.getPlaylistLiveData().observe(getViewLifecycleOwner(),
+        mPlaylistViewModel =
+                new ViewModelProvider(requireActivity(), factory).get(PlaylistViewModel.class);
+        mPlaylistViewModel.getPlaylists().observe(getViewLifecycleOwner(),
                 playlists -> mAdapter.updatePlaylists(playlists));
     }
 

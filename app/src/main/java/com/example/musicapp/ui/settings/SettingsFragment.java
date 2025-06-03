@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
 import androidx.preference.ListPreference;
@@ -19,12 +21,15 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.example.musicapp.R;
 import com.example.musicapp.data.model.auth.LogoutRequest;
+import com.example.musicapp.data.model.auth.UpdatePasswordRequest;
 import com.example.musicapp.data.repository.auth.AuthRepositoryImpl;
+import com.example.musicapp.databinding.DialogChangePasswordBinding;
 import com.example.musicapp.ui.auth.AuthActivity;
 import com.example.musicapp.utils.AppUtils;
 import com.example.musicapp.utils.TokenManager;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -39,6 +44,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public static final String KEY_PREF_LANGUAGE = "language";
     public static final String KEY_PREF_CHANGE_PASSWORD = "change_password";
     public static final String KEY_PREF_LOGOUT = "logout";
+    private DialogChangePasswordBinding mBinding;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Inject
@@ -83,8 +89,19 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             });
         }
 
+        Preference changePasswordPref = findPreference(KEY_PREF_CHANGE_PASSWORD);
+        if (changePasswordPref != null) {
+            changePasswordPref.setVisible(tokenManager.getToken() != null);
+            changePasswordPref.setVisible(tokenManager.getToken() != null);
+            changePasswordPref.setOnPreferenceClickListener(preference -> {
+                showChangePasswordDialog();
+                return true;
+            });
+        }
+
         Preference logoutPref = findPreference(KEY_PREF_LOGOUT);
         if (logoutPref != null) {
+            logoutPref.setVisible(tokenManager.getToken() != null);
             logoutPref.setOnPreferenceClickListener(preference -> {
                 performLogout();
                 return true;
@@ -134,12 +151,70 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         mDisposable.add(authRepository.logout(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        response -> {
+                .subscribe(response -> {
                             tokenManager.clearToken();
                             startActivity(new Intent(getContext(), AuthActivity.class));
                             requireActivity().finishAffinity();
                         }, throwable -> Toast.makeText(getContext(), "Logout failed: " + throwable.getMessage(), Toast.LENGTH_SHORT).show()
+                )
+        );
+    }
+
+    private void showChangePasswordDialog() {
+        mBinding = DialogChangePasswordBinding.inflate(LayoutInflater.from(requireContext()));
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.title_change_password)
+                .setView(mBinding.getRoot())
+                .setPositiveButton(R.string.action_save, null) // set null để tự xử lý validate
+                .setNegativeButton(R.string.action_cancel, null)
+                .create();
+
+        dialog.setOnShowListener(dlg -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String oldPassword = Objects.requireNonNull(mBinding.edtOldPassword.getText()).toString();
+                String newPassword = Objects.requireNonNull(mBinding.edtNewPassword.getText()).toString();
+                String confirmPassword = Objects.requireNonNull(mBinding.edtConfirmPassword.getText()).toString();
+
+                if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                    Toast.makeText(requireContext(), R.string.text_please_fill_in_all_information, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!isValidPassword(newPassword)) {
+                    Toast.makeText(requireContext(), R.string.text_invalid_password_format, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!newPassword.equals(confirmPassword)) {
+                    Toast.makeText(requireContext(), R.string.text_confirmation_password_does_not_match, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                performChangePassword(oldPassword, newPassword, dialog);
+            });
+        });
+
+        dialog.setOnDismissListener(d -> mBinding = null);
+        dialog.show();
+    }
+
+    private boolean isValidPassword(String password) {
+        String passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$";
+        return password.matches(passwordPattern);
+    }
+
+    private void performChangePassword(String oldPassword, String newPassword, AlertDialog dialog) {
+        int userId = tokenManager.getUserId();
+        UpdatePasswordRequest request = new UpdatePasswordRequest(userId, oldPassword, newPassword);
+        String token = "Bearer " + tokenManager.getToken();
+
+        mDisposable.add(authRepository.updatePassword(token, request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(response -> {
+                            Toast.makeText(requireContext(), R.string.change_password_successfully, Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        },
+                        throwable -> Toast.makeText(requireContext(), R.string.change_password_failed, Toast.LENGTH_SHORT).show()
                 )
         );
     }

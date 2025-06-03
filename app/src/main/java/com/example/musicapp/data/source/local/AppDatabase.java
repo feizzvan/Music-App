@@ -18,6 +18,7 @@ import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.playlist.PlaylistSongCrossRef;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.source.local.artist.ArtistDAO;
+import com.example.musicapp.data.source.local.playlist.PlaylistDAO;
 import com.example.musicapp.data.source.local.recent.RecentSongDAO;
 import com.example.musicapp.data.source.local.searching.SearchingDAO;
 import com.example.musicapp.data.source.local.song.SongDAO;
@@ -26,7 +27,7 @@ import com.example.musicapp.data.source.local.song.SongDAO;
 @Database(
         entities = {
                 Album.class,
-//                Playlist.class,
+                Playlist.class,
                 Song.class,
                 RecentSong.class,
                 PlaylistSongCrossRef.class,
@@ -66,7 +67,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract RecentSongDAO recentSongDAO();
 
-//    public abstract PlaylistDAO playlistDAO();
+    public abstract PlaylistDAO playlistDAO();
 
     public abstract AlbumDAO albumDAO();
 

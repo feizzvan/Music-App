@@ -68,7 +68,6 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
                     .circleCrop()
                     .into(mBinding.imgItemArtistAvatar);
             mBinding.textItemArtistName.setText(artist.getName());
-//            mBinding.textItemArtistSong.setText(String.valueOf(artist.getSongCount()));
             mBinding.textItemArtistSong.setText(mBinding.getRoot().getContext().
                     getString(R.string.text_number_song, artist.getSongCount()));
             mBinding.getRoot().setOnClickListener(view -> mListener.onClick(artist));

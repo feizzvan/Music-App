@@ -2,7 +2,7 @@ package com.example.musicapp.data.repository.auth;
 
 import com.example.musicapp.data.model.auth.AuthenticationResponse;
 import com.example.musicapp.data.model.auth.LogoutRequest;
-import com.example.musicapp.data.model.auth.ResetPassword;
+import com.example.musicapp.data.model.auth.UpdatePasswordRequest;
 import com.example.musicapp.data.source.AuthDataSource;
 
 import javax.inject.Inject;
@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import io.reactivex.rxjava3.core.Single;
 
 public class AuthRepositoryImpl implements AuthRepository {
-    private AuthDataSource mRemoteDataSource;
+    private final AuthDataSource mRemoteDataSource;
 
     @Inject
     public AuthRepositoryImpl(AuthDataSource remoteDataSource) {
@@ -18,8 +18,8 @@ public class AuthRepositoryImpl implements AuthRepository {
     }
 
     @Override
-    public Single<AuthenticationResponse> resetPassword(ResetPassword resetPassword) {
-        return mRemoteDataSource.resetPassword(resetPassword);
+    public Single<AuthenticationResponse> updatePassword(String token, UpdatePasswordRequest updatePasswordRequest) {
+        return mRemoteDataSource.updatePassword(token, updatePasswordRequest);
     }
 
     @Override
