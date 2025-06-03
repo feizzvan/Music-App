@@ -87,6 +87,7 @@ public class MostHeardFragment extends AppBaseFragment {
                 .subscribe(songs -> {
                     mAdapter.updateSongs(songs);
                     mMostHeardViewModel.setSongs(songs);
+
                     SharedDataUtils.setupPlaylist(songs, MOST_HEARD.getValue());
                 }, throwable -> mMostHeardViewModel.setSongs(new ArrayList<>()))
         );

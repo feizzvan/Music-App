@@ -5,6 +5,9 @@ import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.SEARCHED;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,7 @@ import com.example.musicapp.databinding.FragmentSearchingBinding;
 import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.SongListAdapter;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.GsonBuilder;
 
 import javax.inject.Inject;
 
@@ -83,7 +87,7 @@ public class SearchingFragment extends AppBaseFragment {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
     }
-
+private String textSearch = "";
     private void setupSearchView() {
         SearchManager manager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
         mBinding.searchViewHome.setSearchableInfo(manager.getSearchableInfo(requireActivity().getComponentName()));
@@ -95,33 +99,42 @@ public class SearchingFragment extends AppBaseFragment {
         mBinding.searchViewHome.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (!query.trim().isEmpty()) {
-                    activeSearchResultLayout(true);
-                    performSearch(query);
-                    saveSearchedKey(query);
-                } else {
-                    activeSearchResultLayout(false);
-                }
+                search(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (!newText.trim().isEmpty()) {
-                    activeSearchResultLayout(true);
-                    performSearch(newText);
-                } else {
-                    activeSearchResultLayout(false);
-                }
+                search(newText);
                 return true;
             }
         });
+    }
+
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private Runnable mRunnable = () -> {
+        if (!textSearch.trim().isEmpty()) {
+            activeSearchResultLayout(true);
+            performSearch(textSearch);
+            saveSearchedKey(textSearch);
+        } else {
+            activeSearchResultLayout(false);
+        }
+    };
+
+    private void search(String textSearch) {
+        this.textSearch = textSearch;
+        mHandler.removeCallbacks(mRunnable);
+        mHandler.postDelayed(mRunnable, 250L);
     }
 
     private void setupViewModel() {
         mSearchingViewModel = new ViewModelProvider(requireActivity(), mSearchingFactory)
                 .get(SearchingViewModel.class);
         mSearchingViewModel.getSongs().observe(getViewLifecycleOwner(), songs -> {
+            String  json = new GsonBuilder().create().toJson(songs);
+            Log.d("VANVAN2", "mSearchingViewModel: " + json);
             if (songs != null) {
                 mAdapter.updateSongs(songs);
             }

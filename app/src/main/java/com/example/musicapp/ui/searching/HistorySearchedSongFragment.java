@@ -12,11 +12,14 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.musicapp.R;
+import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.databinding.FragmentHistorySearchedSongBinding;
 import com.example.musicapp.ui.AppBaseFragment;
 import com.example.musicapp.ui.dialog.ConfirmationDialogFragment;
 import com.example.musicapp.ui.SongListAdapter;
 import com.example.musicapp.utils.SharedDataUtils;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -61,6 +64,7 @@ public class HistorySearchedSongFragment extends AppBaseFragment {
                 (song, index) -> {
                     mBinding.getRoot().requestFocus();
                     String playlistName = SEARCHED.getValue();
+                    SharedDataUtils.setupPlaylist(mAdapter.getSongs(), SEARCHED.getValue());
                     showAndPlay(song, index, playlistName);
                 }, this::showOptionMenu
         );

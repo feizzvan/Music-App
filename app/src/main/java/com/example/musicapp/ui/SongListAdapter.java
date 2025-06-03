@@ -45,6 +45,10 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
         return mSongs.size();
     }
 
+    public List<Song> getSongs() {
+        return mSongs;
+    }
+
     public void updateSongs(List<Song> songs) {
         if (songs != null) {
             int oldSize = mSongs.size();
