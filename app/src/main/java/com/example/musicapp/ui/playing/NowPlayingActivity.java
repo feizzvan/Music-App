@@ -1,5 +1,7 @@
 package com.example.musicapp.ui.playing;
 
+import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.SEARCHED;
+
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
@@ -30,6 +32,7 @@ import androidx.media3.session.MediaController;
 import com.bumptech.glide.Glide;
 import com.example.musicapp.R;
 import com.example.musicapp.data.model.PlayingSong;
+import com.example.musicapp.data.model.playlist.Playlist;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.song.SongRepository;
 import com.example.musicapp.databinding.ActivityNowPlayingBinding;
@@ -78,6 +81,7 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                         updateSeekBar();
                         updateSeekBarMaxValue();
                         updateDuration();
+                        playSong();
                     }
                 });
             } catch (Exception e) {
@@ -89,6 +93,36 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
         public void onServiceDisconnected(ComponentName componentName) {
         }
     };
+
+    private void playSong() {
+        Integer index = SharedDataUtils.getIndexToPlay().getValue();
+        Log.d("VANVA", "getIndexToPlay: " + index);
+        if (index != null) {
+            PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
+            Playlist currentPlaylist = null;
+            if (playingSong != null) {
+                currentPlaylist = playingSong.getPlaylist();
+            }
+            Playlist playlist = SharedDataUtils.getCurrentPlaylist().getValue();
+            // TH1: cùng playlist, cùng index => KHÔNG phát lại mà tiếp tục
+            // TH2: khác playlist, cùng index => PHÁT từ đầu bài hát
+            if (mMediaController != null && index > -1) {
+                Boolean condition1 = mMediaController.getMediaItemCount() > index
+                        && mMediaController.getCurrentMediaItemIndex() != index;
+                Boolean condition2 = playlist != null && currentPlaylist != null
+                        && mMediaController.getCurrentMediaItemIndex() == index
+                        && playlist.getId() != currentPlaylist.getId();
+                Boolean condition3 = playlist != null
+                        && playlist.getName().compareTo(SEARCHED.getValue()) == 0;
+                if (condition1 || condition2 || condition3) {
+                    Log.d("VANVAN", "setupObserveControllerData: ");
+                    mMediaController.seekTo(index, 0);
+                    mMediaController.prepare();
+                    mMediaController.play();
+                }
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -9,7 +9,7 @@ public class AppConfig {
 
     public static void init() {
 //        BASE_URL = context.getString(R.string.base_url);
-        BASE_URL = "https://trusty-optimal-fowl.ngrok-free.app";
-//        BASE_URL = "http://192.168.0.103:8080";
+//        BASE_URL = "https://trusty-optimal-fowl.ngrok-free.app";
+        BASE_URL = "http://192.168.0.103:8080";
     }
 }

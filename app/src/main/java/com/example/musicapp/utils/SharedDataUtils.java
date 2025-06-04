@@ -2,6 +2,8 @@ package com.example.musicapp.utils;
 
 import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.DEFAULT;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -226,6 +228,7 @@ public final class SharedDataUtils {
     }
 
     public static void setIndexToPlay(int index) {
+        Log.d("VANVAN", "setIndexToPlay: " + index);
         mIndexToPlay.setValue(index);
 //        setPlayingSong(index);
     }
