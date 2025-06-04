@@ -66,6 +66,7 @@ public class MostHeardFragment extends AppBaseFragment {
         mAdapter = new SongListAdapter(
                 (song, index) -> {
                     String playlistName = MOST_HEARD.getValue();
+                    SharedDataUtils.setupPlaylist(mAdapter.getSongs(), MOST_HEARD.getValue());
                     showAndPlay(song, index, playlistName);
                 }, this::showOptionMenu
         );

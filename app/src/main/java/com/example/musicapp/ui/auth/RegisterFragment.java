@@ -91,7 +91,7 @@ public class RegisterFragment extends Fragment {
                 showProgressBar(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(getContext(), R.string.text_registration_successful, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.text_check_email_to_verify_your_account, Toast.LENGTH_SHORT).show();
                     navigateToLogin();
                 } else {
                     Toast.makeText(getContext(), R.string.text_email_already_exists, Toast.LENGTH_SHORT).show();

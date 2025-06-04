@@ -103,7 +103,7 @@
     <string name="text_invalid_email_format">Email không đúng định dạng.</string>
     <string name="text_invalid_password_format">Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ và số.</string>
     <string name="text_confirmation_password_does_not_match">Mật khẩu xác nhận không khớp.</string>
-    <string name="text_registration_successful">Đăng ký thành công!</string>
+    <string name="text_check_email_to_verify_your_account">Vui lòng kiểm tra email để xác minh tài khoản của bạn.</string>
     <string name="text_email_already_exists">Email đã tồn tại</string>
     <string name="playlist_creation_failed">"Không tạo được danh sách phát: "</string>
     <string name="favorite_add_failed">"Thêm yêu thích không thành công: "</string>

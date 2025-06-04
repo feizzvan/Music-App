@@ -39,10 +39,6 @@ public class MostHeardViewModel extends ViewModel {
         return mListeningCountsRepository.getTopMostHeardSongs().map(TopListeningCounts::getSongs);
     }
 
-//    public Flowable<List<Song>> loadTop15MostHeardSong() {
-//        return mSongRepository.getTopNMostHeardSongs(15);
-//    }
-
     public static class Factory implements ViewModelProvider.Factory {
         private final ListeningCountsRepositoryImpl mListeningCountsRepository;
 

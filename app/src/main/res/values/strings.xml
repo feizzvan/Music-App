@@ -103,7 +103,7 @@
     <string name="text_invalid_email_format">Email is not in correct format.</string>
     <string name="text_invalid_password_format">Password must be at least 6 characters, including letters and numbers.</string>
     <string name="text_confirmation_password_does_not_match">Confirmation password does not match.</string>
-    <string name="text_registration_successful">Registration successful!</string>
+    <string name="text_check_email_to_verify_your_account">Please check your email to verify your account.</string>
     <string name="text_email_already_exists">Email already exists</string>
     <string name="playlist_creation_failed">"Playlist creation failed: "</string>
     <string name="favorite_add_failed">"Favorite add failed: "</string>
