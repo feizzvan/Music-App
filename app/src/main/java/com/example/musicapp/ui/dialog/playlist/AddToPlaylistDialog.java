@@ -5,8 +5,13 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
@@ -89,6 +94,7 @@ public class AddToPlaylistDialog extends DialogFragment {
             }
         });
 
+
         builder.setView(rootView);
         loadPlaylist();
 
@@ -101,6 +107,25 @@ public class AddToPlaylistDialog extends DialogFragment {
 
         return builder.create();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            Window window = getDialog().getWindow();
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            requireActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            int screenHeight = metrics.heightPixels;
+            int desiredHeight = (int) (screenHeight * 0.6); // 90% chiều rộng màn hình
+
+            window.setLayout( ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
+            window.setGravity(Gravity.CENTER); // Tùy chọn: căn giữa dialog
+        }
+    }
+
 
     @Override
     public void onDestroy() {
@@ -142,7 +167,6 @@ public class AddToPlaylistDialog extends DialogFragment {
     private void loadPlaylist() {
         mPlaylistViewModel.getPlaylists().observe(requireActivity(), playlists -> {
             mAdapter.updatePlaylists(playlists);
-            mPlaylistViewModel.setPlaylists(playlists);
         });
     }
 
@@ -150,23 +174,22 @@ public class AddToPlaylistDialog extends DialogFragment {
         mDisposable.add(mPlaylistViewModel.createPlaylist(playlistName)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> doCreatePlaylist(result, playlistName),
-                        error -> doCreatePlaylist(null, playlistName))
+                .subscribe(result -> {
+                            if (result != null && result.getData() != null) {
+                                Toast.makeText(requireContext(), getString(R.string.playlist_created) + result.getData().getName(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(requireContext(), R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
+                            }
+                            mPlaylistViewModel.loadPlaylistByUserId(tokenManager.getUserId());
+                        },
+                        error -> {
+                            String errorMessage = getString(R.string.error_playlist_already_exists);
+                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                        })
         );
     }
 
-    private void doCreatePlaylist(PlaylistById playlistById, String playlistName) {
-        if (playlistById == null) {
-            mDisposable.add(mPlaylistViewModel.createPlaylist(playlistName)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe()
-            );
-        } else {
-            String errorMessage = getString(R.string.error_playlist_already_exists);
-            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
-        }
-    }
+
 
     private void closeKeyboard(TextInputEditText view) {
         InputMethodManager inputMethodManager = (InputMethodManager) requireActivity()

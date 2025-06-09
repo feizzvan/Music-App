@@ -18,6 +18,8 @@
         android:roundIcon="@mipmap/ic_app_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicApp"
+        android:largeHeap="true"
+        android:hardwareAccelerated="false"
         tools:targetApi="31">
 
         <activity android:name=".ui.auth.AuthActivity" />

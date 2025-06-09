@@ -170,18 +170,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void observeData() {
-//        mDisposable.add(mPlaylistViewModel.getAllPlaylistWithSongs()
+//        mDisposable.add(mPlaylistViewModel.loadPlaylistByUserId(tokenManager.getUserId())
 //                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribe(
-//                        playlistWithSongs -> {
-//                            mPlaylistViewModel.setPlaylists(playlistWithSongs);
-//                            SharedDataUtils.setPlaylistSongs(playlistWithSongs);
+//                        playlistByUserId -> {
+//                            mPlaylistViewModel.setPlaylists(playlistByUserId);
+//                            SharedDataUtils.setPlaylistSongs(playlistByUserId);
 //                        },
 //                        error -> {
 //                        }
 //                )
 //        );
+        mPlaylistViewModel.loadPlaylistByUserId(tokenManager.getUserId());
 
         MainViewModel mainViewModel = new ViewModelProvider(this, mMainViewModelFactory)
                 .get(MainViewModel.class);

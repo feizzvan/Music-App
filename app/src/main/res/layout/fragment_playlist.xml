@@ -49,14 +49,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_btn_add_playlist"
         tools:listitem="@layout/item_playlist">
-
     </androidx.recyclerview.widget.RecyclerView>
-
-    <include
-        layout="@layout/partial_empty_item"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rv_playlist" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -351,21 +351,6 @@ public class NowPlayingActivity extends AppCompatActivity implements View.OnClic
                         updateSeekBarMaxValue();
                         updateDuration();
                     }
-                    Log.d("VANVAN", "Playback state: " + playbackState);
-                    switch (playbackState) {
-                        case Player.STATE_BUFFERING:
-                            Log.d("PlayerDebug", "Buffering...");
-                            break;
-                        case Player.STATE_READY:
-                            Log.d("PlayerDebug", "Ready!");
-                            break;
-                        case Player.STATE_ENDED:
-                            Log.d("PlayerDebug", "Ended.");
-                            break;
-                        case Player.STATE_IDLE:
-                            Log.d("PlayerDebug", "Idle.");
-                            break;
-                    }
                 }
             };
             mMediaController.addListener(mPlayerListener);

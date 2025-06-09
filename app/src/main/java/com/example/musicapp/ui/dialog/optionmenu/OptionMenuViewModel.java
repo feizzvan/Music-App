@@ -13,10 +13,6 @@ public class OptionMenuViewModel extends ViewModel {
     private final MutableLiveData<List<OptionMenuItem>> mOptionMenuItem = new MutableLiveData<>();
     private final MutableLiveData<Song> mSong = new MutableLiveData<>();
 
-//    public OptionMenuViewModel() {
-////        mOptionMenuItem.setValue(MenuOptionUtils.getSongOptionMenuItems());
-//    }
-
     public LiveData<Song> getSong() {
         return mSong;
     }
@@ -28,11 +24,5 @@ public class OptionMenuViewModel extends ViewModel {
     public void setSong(Song song) {
         mSong.setValue(song);
         mOptionMenuItem.setValue(MenuOptionUtils.getSongOptionMenuItems(song));
-    }
-
-    public void setOptionMenuItem(List<OptionMenuItem> optionMenuItems) {
-        if (optionMenuItems != null) {
-            mOptionMenuItem.setValue(optionMenuItems);
-        }
     }
 }

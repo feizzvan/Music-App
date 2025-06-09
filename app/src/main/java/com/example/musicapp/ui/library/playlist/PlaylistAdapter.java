@@ -48,12 +48,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             int oldSize = mPlaylists.size();
             mPlaylists.clear();
             mPlaylists.addAll(newPlaylists);
-            if (oldSize > mPlaylists.size()) {
-                notifyItemRangeRemoved(0, oldSize);
-            }
-            notifyItemRangeChanged(0, mPlaylists.size());
-//            notifyDataSetChanged();
+            notifyDataSetChanged();
         }
+    }
+
+    public void addPlaylist(Playlist playlist) {
+        mPlaylists.add(playlist);
+        notifyItemInserted(mPlaylists.size() - 1);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -88,7 +89,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             mBinding.btnItemPlaylistOption
                     .setOnClickListener(v -> mMenuClickListener.onClick(playlist));
         }
-
     }
 
     public interface OnPlaylistItemClickListener {

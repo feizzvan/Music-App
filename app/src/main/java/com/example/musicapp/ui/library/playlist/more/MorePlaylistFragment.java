@@ -64,8 +64,9 @@ public class MorePlaylistFragment extends AppBaseFragment {
     private void setupViewModel() {
         mPlaylistViewModel =
                 new ViewModelProvider(requireActivity(), factory).get(PlaylistViewModel.class);
-        mPlaylistViewModel.getPlaylists().observe(getViewLifecycleOwner(),
-                playlists -> mAdapter.updatePlaylists(playlists));
+        mPlaylistViewModel.getPlaylists().observe(getViewLifecycleOwner(), playlists -> {
+            mAdapter.updatePlaylists(playlists);
+        });
     }
 
     private void navigateToPlaylistDetail(Playlist playlist) {

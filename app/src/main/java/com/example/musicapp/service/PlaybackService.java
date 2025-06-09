@@ -50,9 +50,6 @@ public class PlaybackService extends MediaSessionService {
     @Inject
     public RecentSongRepository recentSongRepository;
 
-//    @Inject
-//    SongRepository.Local localSongRepository;
-
     @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onCreate() {
@@ -139,22 +136,8 @@ public class PlaybackService extends MediaSessionService {
                     mDisposable.add(SharedDataUtils.saveRecentSong(song, recentSongRepository)
                             .subscribeOn(Schedulers.io())
                             .subscribe());
-//                    saveCounterToDB();
                 }
             }, 5000);
-        }
-    }
-
-    private void saveCounterToDB() {
-        Song song = extractSong();
-        if (song != null) {
-            HandlerThread handlerThread = new HandlerThread("Thread Save Counter",
-                    Process.THREAD_PRIORITY_BACKGROUND);
-            handlerThread.start();
-            Handler handler = new Handler(handlerThread.getLooper());
-//            handler.post(() -> mDisposable.add(SharedDataUtils.updateSongInDB(song, localSongRepository)
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe()));
         }
     }
 

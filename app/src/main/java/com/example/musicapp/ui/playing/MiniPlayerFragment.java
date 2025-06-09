@@ -316,31 +316,5 @@ public class MiniPlayerFragment extends AppBaseFragment implements View.OnClickL
                 mMediaController.setMediaItems(mediaItems);
             }
         });
-
-        SharedDataUtils.getIndexToPlay().observe(getViewLifecycleOwner(), index -> {
-//            PlayingSong playingSong = SharedDataUtils.getPlayingSong().getValue();
-//            Playlist currentPlaylist = null;
-//            if (playingSong != null) {
-//                currentPlaylist = playingSong.getPlaylist();
-//            }
-//            Playlist playlist = SharedDataUtils.getCurrentPlaylist().getValue();
-//            // TH1: cùng playlist, cùng index => KHÔNG phát lại mà tiếp tục
-//            // TH2: khác playlist, cùng index => PHÁT từ đầu bài hát
-//            if (mMediaController != null && index > -1) {
-//                Boolean condition1 = mMediaController.getMediaItemCount() > index
-//                        && mMediaController.getCurrentMediaItemIndex() != index;
-//                Boolean condition2 = playlist != null && currentPlaylist != null
-//                        && mMediaController.getCurrentMediaItemIndex() == index
-//                        && playlist.getId() != currentPlaylist.getId();
-//                Boolean condition3 = playlist != null
-//                        && playlist.getName().compareTo(SEARCHED.getValue()) == 0;
-//                if (condition1 || condition2 || condition3) {
-//                    Log.d("VANVAN", "setupObserveControllerData: ");
-//                    mMediaController.seekTo(index, 0);
-//                    mMediaController.prepare();
-////                    mMediaController.play();
-//                }
-//            }
-        });
     }
 }

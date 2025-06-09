@@ -32,8 +32,12 @@ public class HistorySearchedSong extends Song {
             mInstance.setId(mSong.getId());
             mInstance.setTitle(mSong.getTitle());
             mInstance.setArtistId(mSong.getArtistId());
+            mInstance.setArtistName(mSong.getArtistName());
             mInstance.setDuration(mSong.getDuration());
             mInstance.setImageUrl(mSong.getImageUrl());
+            mInstance.setGenreName(mSong.getGenreName());
+            mInstance.setListenCount(mSong.getListenCount());
+            mInstance.setFavoriteCount(mSong.getFavoriteCount());
 //            mInstance.setCounter(mSong.getCounter());
             mInstance.setFileUrl(mSong.getFullFileUrl());
             mInstance.setSelectedAt(new Date());
