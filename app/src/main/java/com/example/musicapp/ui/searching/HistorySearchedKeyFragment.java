@@ -84,7 +84,13 @@ public class HistorySearchedKeyFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(keys -> {
                     if (keys != null) {
-                        mAdapter.updateKeys(keys);
+                        List<HistorySearchedKey> list;
+                        if (keys.size() > 9) {
+                            list = keys.subList(0, 9);
+                        } else {
+                            list = keys;
+                        }
+                        mAdapter.updateKeys(list);
                     }
                 })
         );

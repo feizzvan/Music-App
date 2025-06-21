@@ -1,6 +1,5 @@
 package com.example.musicapp.ui.library;
 
-import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.FAVOURITE;
 import static com.example.musicapp.utils.AppUtils.DefaultPlaylistName.RECENT;
 
 import android.os.Bundle;
@@ -15,17 +14,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.recent.RecentSongRepository;
 import com.example.musicapp.databinding.FragmentLibraryBinding;
 import com.example.musicapp.ui.SongListAdapter;
-import com.example.musicapp.ui.library.favorite.FavoriteViewModel;
 import com.example.musicapp.ui.library.playlist.PlaylistViewModel;
 import com.example.musicapp.ui.library.recent.RecentSongViewModel;
 import com.example.musicapp.ui.searching.SearchingFragmentDirections;
 import com.example.musicapp.utils.SharedDataUtils;
-
-import java.util.List;
 
 import javax.inject.Inject;
 

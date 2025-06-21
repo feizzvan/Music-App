@@ -4,8 +4,6 @@ package com.example.musicapp.service;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Process;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +19,6 @@ import androidx.media3.session.MediaSessionService;
 import com.example.musicapp.data.model.PlayingSong;
 import com.example.musicapp.data.model.song.Song;
 import com.example.musicapp.data.repository.recent.RecentSongRepository;
-import com.example.musicapp.data.repository.song.SongRepository;
 import com.example.musicapp.ui.playing.NowPlayingActivity;
 import com.example.musicapp.utils.SharedDataUtils;
 
@@ -89,14 +86,14 @@ public class PlaybackService extends MediaSessionService {
         MediaSession.Builder mediaSessionBuilder = new MediaSession.Builder(this, player);
 
         PendingIntent pendingIntent = getSingleTopActivity();
-        if(pendingIntent != null){
+        if (pendingIntent != null) {
             mediaSessionBuilder.setSessionActivity(pendingIntent);
         }
         // Gán MediaSession đã được xây dựng vào biến mMediaSession
         mMediaSession = mediaSessionBuilder.build();
     }
 
-    private PendingIntent getSingleTopActivity(){
+    private PendingIntent getSingleTopActivity() {
         Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
         return PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

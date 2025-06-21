@@ -30,15 +30,13 @@ public class RecentSong extends Song {
             sRecentSong = new RecentSong();
             sRecentSong.setId(song.getId());
             sRecentSong.setTitle(song.getTitle());
-//            sRecentSong.setAlbum(song.getAlbum());
             sRecentSong.setArtistId(song.getArtistId());
             sRecentSong.setArtistName(song.getArtistName() );
-            sRecentSong.setFileUrl(song.getFullFileUrl());
+            sRecentSong.setFileUrl(song.getFileUrl());
             sRecentSong.setImageUrl(song.getImageUrl());
             sRecentSong.setDuration(song.getDuration());
 //            sRecentSong.setFavorite(song.isFavorite());
 ////            sRecentSong.setCounter(song.getCounter());
-////            sRecentSong.setReplay(song.getReplay());
             sRecentSong.mPlayAt = new Date();
         }
 

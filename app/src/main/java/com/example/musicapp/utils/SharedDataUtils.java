@@ -26,7 +26,6 @@ public final class SharedDataUtils {
     private static final MutableLiveData<Playlist> mPlaylistLiveData = new MutableLiveData<>();
     private static final MutableLiveData<PlayingSong> mPlayingSongLiveData = new MutableLiveData<>();
     private static final PlayingSong mPlayingSong = new PlayingSong();
-    private static String mPlaylistName;
     private static final MutableLiveData<Integer> mIndexToPlay = new MutableLiveData<>();
     private static final MutableLiveData<Boolean> isSongLoaded = new MutableLiveData<>();
     private static final MutableLiveData<List<Song>> mFavoriteSongsLiveData = new MutableLiveData<>(new ArrayList<>());
@@ -53,10 +52,6 @@ public final class SharedDataUtils {
         RecentSong recentSong = new RecentSong.Builder(song).build();
         return recentSongRepository.insertRecentSong(recentSong);
     }
-
-//    public static Completable updateSongInDB(Song song, SongRepository repository) {
-//        return repository.updateSong(song);
-//    }
 
     public static LiveData<List<Song>> getFavoriteSongsLiveData() {
         return mFavoriteSongsLiveData;
@@ -98,7 +93,6 @@ public final class SharedDataUtils {
 
     public static void setupPreviousSessionPlayingSong(String songId, String playlistName) {
         int index;
-//        mPlaylistName = playlistName;
         Playlist playlist = getPlaylist(playlistName);
         if (playlist == null) {
             playlist = getPlaylist(DEFAULT.getValue());
@@ -138,27 +132,13 @@ public final class SharedDataUtils {
         return false;
     }
 
-    public static void setPlaylistSongs(List<Playlist> playlists) {
-        if (playlists != null) {
-            for (Playlist element : playlists) {
-                element.updateSongs(element.getSongs());
-                addPlaylist(element);
-            }
-        }
-    }
-
     public static LiveData<Playlist> getCurrentPlaylist() {
         return mPlaylistLiveData;
     }
 
-//    public static String getCurrentPlaylistName() {
-//        return mPlaylistName;
-//    }
-
     public static void setCurrentPlaylist(String playlistName) {
         Playlist playlist = getPlaylist(playlistName);
         if (playlist != null) {
-//            mPlaylistName = playlistName;
             mPlaylistLiveData.setValue(playlist);
             mPlayingSong.setPlaylist(playlist);
         }
@@ -168,27 +148,12 @@ public final class SharedDataUtils {
         return mPlaylistMap.getOrDefault(playlistName, null);
     }
 
-//    public static List<Song> getPlaylistSongs(String playlistName) {
-//        Playlist playlist = getPlaylist(playlistName);
-//        if (playlist != null) {
-//            return playlist.getSongs();
-//        }
-//        return new ArrayList<>();
-//    }
-
     public static LiveData<PlayingSong> getPlayingSong() {
         return mPlayingSongLiveData;
     }
 
     public static void setPlayingSong(PlayingSong playingSong) {
         mPlayingSongLiveData.setValue(playingSong);
-    }
-
-    public static void setCurrentSIRSong(Song song) {
-        if (song != null) {
-            mPlayingSong.setSong(song);
-            mPlayingSongLiveData.setValue(mPlayingSong);
-        }
     }
 
     public static void setupPlaylist(List<Song> songs, String playlistName) {
@@ -199,19 +164,18 @@ public final class SharedDataUtils {
         if (playlist != null) {
             playlist.updateSongs(songs);
             mPlaylistMap.put(playlistName, playlist);
+        } else {
+            playlist = new Playlist(-1, playlistName);
+            playlist.updateSongs(songs);
+            mPlaylistMap.put(playlistName, playlist);
         }
-//        else {
-//            playlist = new Playlist(-1, playlistName);
-//            playlist.updateSongs(songs);
-//            mPlaylistMap.put(playlistName, playlist);
-//        }
     }
 
     public static void addPlaylist(Playlist playlist) {
-//        if (!mPlaylistMap.containsKey(playlist.getName())) {
-//            mPlaylistMap.put(playlist.getName(), playlist);
-//        }
-        mPlaylistMap.put(playlist.getName(), playlist);
+        if (!mPlaylistMap.containsKey(playlist.getName())) {
+            mPlaylistMap.put(playlist.getName(), playlist);
+        }
+//        mPlaylistMap.put(playlist.getName(), playlist);
     }
 
     public static void setPlayingSong(int index) {
@@ -230,7 +194,6 @@ public final class SharedDataUtils {
     public static void setIndexToPlay(int index) {
         Log.d("VANVAN", "setIndexToPlay: " + index);
         mIndexToPlay.setValue(index);
-//        setPlayingSong(index);
     }
 
     public static LiveData<Boolean> isSongLoaded() {
